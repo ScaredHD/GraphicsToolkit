@@ -2,4 +2,3 @@ build
 .cache
 main.cpp
 test
-math
