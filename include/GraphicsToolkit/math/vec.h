@@ -1,8 +1,8 @@
 #ifndef VEC_H
 #define VEC_H
 
-#include "vec_op.h"
-#include "vec_temp.h"
+#include "impl/vec_op.h"
+#include "impl/vec_temp.h"
 
 
 

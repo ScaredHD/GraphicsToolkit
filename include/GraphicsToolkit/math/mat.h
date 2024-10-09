@@ -1,8 +1,8 @@
 #ifndef MAT_H
 #define MAT_H
 
-#include "mat_op.h"
-#include "mat_temp.h"
+#include "impl/mat_op.h"
+#include "impl/mat_temp.h"
 
 
 using Mat2f = Mat<float, 2, 2>;
