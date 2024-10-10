@@ -15,6 +15,7 @@ endif()
 # Only build testing when working as top level project
 if(${IS_TOP_LEVEL_PROJECT})
     enable_testing()
+    add_subdirectory(ext/googletest)
     add_subdirectory(test)
 endif()
 
