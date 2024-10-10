@@ -233,4 +233,16 @@ TEST(MatVecTest, Vec) {
     Vec3d z1 = Cross(x, y1);
     EXPECT_TRUE(AreNearlyEqual(z1, z0));
   }
+  {
+    Mat<double, 3, 1> a = {1, 2, 3};
+    Vec<double, 3> a1;
+    a1 = a;
+
+    Vec<double, 3> b = {1, 2, 3};
+    Mat<double, 3, 1> b1;
+    b1 = b;
+
+    EXPECT_TRUE(AreNearlyEqual(a, b1));
+    EXPECT_TRUE(AreNearlyEqual(a1, b));
+  }
 }
