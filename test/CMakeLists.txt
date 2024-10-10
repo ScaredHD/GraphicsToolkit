@@ -1,4 +1,3 @@
-add_subdirectory(googletest)
 
 add_executable(
     test_app
