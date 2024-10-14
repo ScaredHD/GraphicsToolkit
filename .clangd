@@ -1,0 +1,26 @@
+
+CompileFlags:
+  Add: [-Wall, -std=c++2b]
+  Remove: [-W*, -Wunused-private-field]
+  Compiler: clang++
+
+Diagnostics:
+  ClangTidy:
+    Add: [modernize*, bugprone*, readability*, performance*]
+    Remove:
+      [
+        modernize-use-trailing-return-type,
+        modernize-avoid-c-arrays,
+        modernize-use-nodiscard,
+        bugprone-easily-swappable-parameters,
+        readability-identifier-length,
+        readability-magic-numbers,
+        readability-implicit-bool-conversion,
+        readability-convert-member-functions-to-static,
+        readability-braces-around-statements,
+        modernize-use-nodiscard
+      ]
+  UnusedIncludes: None
+
+Hover:
+  ShowAKA: Yes
