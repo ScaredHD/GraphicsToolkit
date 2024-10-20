@@ -4,7 +4,6 @@
 #include <cmath>
 #include <limits>
 
-
 namespace number {
 constexpr double inf = std::numeric_limits<double>::infinity();
 constexpr double pi = 3.14159265359;
@@ -15,22 +14,27 @@ constexpr double inv2Pi = 0.15915494309;
 constexpr double inv4Pi = 0.07957747154;
 }  // namespace number
 
-template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+template<typename T>
 T Clamp(T val, T lo, T hi) {
   return val > lo ? (val < hi ? val : hi) : lo;
 }
 
-template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+template<typename T>
 T Saturate(T val) {
   return Clamp(val, 0.f, 1.f);
 }
 
-template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+template<typename T>
 T Wrap(T val, T lo, T hi) {
   if (hi < lo) {
     return Wrap(val, hi, lo);
   }
   return (val > 0 ? lo : hi) + std::fmod(val, hi - lo);
+}
+
+template<typename T>
+T MapRange(T x, T l0, T r0, T l1, T r1) {
+  return l1 + ((x - l0) * (r1 - l1) / (r0 - l0));
 }
 
 #endif  // UTILS_H

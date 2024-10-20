@@ -1,9 +1,7 @@
 
-add_library(GtkMath utils.cpp)
+add_library(GtkMath gtk_utils.cpp)
 
 target_include_directories(
     GtkMath
-    PUBLIC ${PROJECT_SOURCE_DIR}/include/GraphicsToolkit/math
-    PRIVATE ${PROJECT_SOURCE_DIR}/include/math
-    PRIVATE ${PROJECT_SOURCE_DIR}/include/math/impl
+    PUBLIC ${gtk_internal_include_directory}/math
 )
