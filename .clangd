@@ -1,6 +1,5 @@
-
 CompileFlags:
-  Add: [-Wall, -std=c++2b]
+  Add: [-Wall, -std=c++17]
   Remove: [-W*, -Wunused-private-field]
   Compiler: clang++
 
@@ -18,7 +17,8 @@ Diagnostics:
         readability-implicit-bool-conversion,
         readability-convert-member-functions-to-static,
         readability-braces-around-statements,
-        modernize-use-nodiscard
+        readability-uppercase-literal-suffix,
+        modernize-use-nodiscard,
       ]
   UnusedIncludes: None
 
