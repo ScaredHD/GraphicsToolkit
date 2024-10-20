@@ -29,6 +29,7 @@ add_library(Gtk gtk.cpp)
 target_link_libraries(
     Gtk
     PRIVATE GtkMath
+    PRIVATE GtkRandom
 )
 
 target_include_directories(
