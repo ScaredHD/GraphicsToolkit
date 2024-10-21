@@ -42,13 +42,13 @@ public:
 
   const Scalar& operator[](size_t i) const { return data_[i]; }
 
-  Iterator begin() { return &data_[0]; }
+  Iterator begin() { return data_.data(); }
 
-  Iterator end() { return &data_[len]; }
+  Iterator end() { return data_.data() + len; }
 
-  ConstIterator cbegin() const { return &data_[0]; }
+  ConstIterator cbegin() const { return data_.data(); }
 
-  ConstIterator cend() const { return &data_[len]; }
+  ConstIterator cend() const { return data_.data() + len; }
 
   template<typename BinaryOp>
   Vec& ComponentwiseOperation(const Vec& other, BinaryOp f) {
