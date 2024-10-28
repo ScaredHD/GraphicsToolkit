@@ -19,6 +19,7 @@ if(${IS_TOP_LEVEL_PROJECT})
     add_subdirectory(test)
 endif()
 
+add_subdirectory(ext)
 
 # All submodule libraries
 add_subdirectory(src)
