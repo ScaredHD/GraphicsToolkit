@@ -1,8 +1,8 @@
+file(GLOB_RECURSE test_src *.cpp)
 
 add_executable(
     test_app
-    mat/mat_vec_test.cpp
-    random/random_test.cpp
+    ${test_src}
 )
 
 target_link_libraries(
@@ -10,6 +10,7 @@ target_link_libraries(
     PRIVATE GTest::gtest_main
             GtkMath
             GtkRandom
+            GtkScene
 )
 
 
