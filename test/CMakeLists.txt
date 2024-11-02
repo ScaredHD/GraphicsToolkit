@@ -11,6 +11,7 @@ target_link_libraries(
             GtkMath
             GtkRandom
             GtkScene
+            GtkCore
 )
 
 
