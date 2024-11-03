@@ -80,7 +80,7 @@ typename V::Type Norm(const T& v) {
 }
 
 template<typename T, typename V = typename ShapeTraits<T>::AsColVec>
-typename V::Type Normalized(const T& v) {
+T Normalized(const T& v) {
   return V{v}.Normalized();
 }
 

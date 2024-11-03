@@ -7,38 +7,46 @@
 
 #include "mesh.h"
 #include "tiny_obj_loader.h"
+#include "vec.h"
 
 class ObjMesh : public IMesh {
 public:
   ObjMesh(const std::string& file);
 
-  // bool HasVertex() const;
+  bool HasVertex() const override;
 
-  // bool HasIndex() const;
+  VertexArray Vertices() const override;
 
-  // bool HasNormal() const;
+  bool HasNormal() const override;
 
-  // bool HasTexCoord() const;
+  NormalArray Normals() const override;
 
-  // bool HasColor() const;
+  bool HasIndex() const override;
 
-  VertexArray Vertices() const override { return vertices_; }
+  IndexArray Indices() const override;
 
-  IndexArray Indices() const override { return indices_; }
+  bool HasColor() const override;
 
-  NormalArray Normals() const override { return normals_; }
+  ColorArray Colors() const override;
 
-  ColorArray Colors() const override { return colors_; }
+  TexCoordArray TexCoords() const override;
 
-  TexCoordArray TexCoords() const override { return texCoords_; }
+  bool HasTexCoord() const override;
 
 private:
+  void GenerateVertexNormals(bool reverseWinding);
+
   tinyobj::ObjReader reader_;
   tinyobj::ObjReaderConfig config_;
+  IndexArray vertexIndices_;
+  IndexArray normalIndices_;
+  IndexArray texCoordIndices_;
+
+  size_t vertexCount_ = 0;
+  size_t faceCount_ = 0;
 
   VertexArray vertices_;
-  IndexArray indices_;
-  NormalArray normals_;
+  std::vector<std::vector<Vec3d>> normals_;
   TexCoordArray texCoords_;
   ColorArray colors_;
 };

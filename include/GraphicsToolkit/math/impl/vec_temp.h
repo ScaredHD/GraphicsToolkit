@@ -20,6 +20,8 @@ public:
 
   static constexpr size_t len = l;
 
+  static constexpr Vec Zero() { return {0., 0., 0.}; }
+
   template<typename... Scalars>
   Vec(Scalars... args) {
     size_t i{};
@@ -55,6 +57,8 @@ public:
     std::transform(begin(), end(), other.cbegin(), begin(), f);
     return *this;
   }
+
+  Vec operator-() const { return Zero() -= *this; }
 
   Vec& operator+=(const Vec& other) { return ComponentwiseOperation(other, std::plus<>{}); }
 

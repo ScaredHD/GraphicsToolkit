@@ -25,15 +25,30 @@ add_subdirectory(ext)
 add_subdirectory(src)
 
 
+# Combine all modules to single target 'Gtk'
 add_library(Gtk gtk.cpp)
 
 target_link_libraries(
     Gtk
-    PRIVATE GtkMath
-    PRIVATE GtkRandom
+    INTERFACE GtkMath
+              GtkRandom
+              GtkScene
 )
 
 target_include_directories(
     Gtk 
     PUBLIC ${PROJECT_SOURCE_DIR}/include
+)
+
+
+# playgound executable
+add_executable(
+    gtk_playground
+    gtk_playground.cpp
+)
+
+target_link_libraries(
+    gtk_playground
+    PRIVATE Gtk
+            fmt
 )

@@ -15,6 +15,6 @@ target_link_libraries(
 
 target_include_directories(
     GtkScene
-    PRIVATE ${tinyobjloader_include_dir}
-    PUBLIC ${gtk_internal_include_directory}/scene
+    PUBLIC ${tinyobjloader_include_dir}
+           ${gtk_internal_include_directory}/scene
 )

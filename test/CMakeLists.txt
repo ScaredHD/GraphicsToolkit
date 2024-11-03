@@ -1,12 +1,12 @@
 file(GLOB_RECURSE test_src *.cpp)
 
 add_executable(
-    test_app
+    gtk_tests
     ${test_src}
 )
 
 target_link_libraries(
-    test_app
+    gtk_tests
     PRIVATE GTest::gtest_main
             GtkMath
             GtkRandom
@@ -16,4 +16,4 @@ target_link_libraries(
 
 
 include(GoogleTest)
-gtest_discover_tests(test_app)
+gtest_discover_tests(gtk_tests)
