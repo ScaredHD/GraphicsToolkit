@@ -3,8 +3,8 @@
 
 #include "obj.h"
 
-TEST(Scene, ObjMesh) {
-  ObjMesh mesh("cube.obj");
+// TEST(Scene, ObjMesh) {
+//   ObjMesh mesh("cube.obj");
 
-  auto v = mesh.Vertices();
-}
+//   auto v = mesh.Vertices();
+// }

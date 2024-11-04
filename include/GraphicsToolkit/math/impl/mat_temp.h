@@ -13,7 +13,7 @@ class Vec;
 template<typename Scalar, size_t m, size_t n>
 class Mat {
 public:
-  using Type = Scalar;
+  using ScalarType = Scalar;
   using Iterator = Scalar*;
   using ConstIterator = const Scalar*;
 
@@ -25,6 +25,8 @@ public:
   static constexpr bool isCol = (n == 1);
   static constexpr bool isScalar = (isRow && isCol);
   static constexpr bool isSquare = (m == n);
+  static constexpr size_t rowCount = m;
+  static constexpr size_t colCount = n;
 
   // Static functions
 
@@ -77,6 +79,10 @@ public:
   Scalar& operator()(size_t i, size_t j) { return data_[i * n + j]; }
 
   const Scalar& operator()(size_t i, size_t j) const { return data_[i * n + j]; }
+
+  Scalar& operator[](size_t i) { return data_[i]; }
+
+  const Scalar& operator[](size_t i) const { return data_[i]; }
 
   auto Row(size_t r) const {
     Mat<Scalar, 1, n> res;
@@ -156,6 +162,12 @@ public:
       }
       return res;
     }
+  }
+
+  template<bool b = isSquare, typename = std::enable_if_t<b>>
+  Mat Inverse() const {
+    // TODO:
+    return {};
   }
 
 private:

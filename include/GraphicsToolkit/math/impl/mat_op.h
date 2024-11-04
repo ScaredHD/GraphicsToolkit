@@ -59,6 +59,21 @@ auto operator/(Scalar x, const Mat<Scalar, m, n>& mat) {
   return res /= x;
 }
 
+// Handle column vector to matrix implicit conversion
+template<typename T, typename U,
+         typename = std::enable_if_t<
+             AsMat<T>::colCount == AsMat<U>::rowCount &&
+             std::is_same_v<typename AsMat<T>::ScalarType, typename AsMat<U>::ScalarType>>>
+auto Mul(const T& a, const U& b) {
+  return Mul(AsMat<T>{a}, AsMat<U>{b});
+}
+
+// Matrix multiplication M_1 x M_2 x ... x M_k
+template<typename T, typename U, typename... Rest>
+auto Mul(const T& a, const U& b, Rest... rest) {
+  return Mul(a, Mul(b, rest...));
+}
+
 // Matrix multiplication A x B
 template<typename Scalar, size_t m, size_t n, size_t p>
 auto Mul(const Mat<Scalar, m, n>& a, const Mat<Scalar, n, p>& b) {
@@ -68,13 +83,6 @@ auto Mul(const Mat<Scalar, m, n>& a, const Mat<Scalar, n, p>& b) {
       for (size_t k = 0; k < n; ++k)
         res(i, j) += a(i, k) * b(k, j);
   return res;
-}
-
-// Matrix multiplication M_1 x M_2 x ... x M_k
-template<typename Scalar, size_t m, size_t n, size_t p, size_t... rowDims, size_t... colDims>
-auto Mul(const Mat<Scalar, m, n>& a, const Mat<Scalar, n, p>& b,
-         const Mat<Scalar, rowDims, colDims>&... rest) {
-  return Mul(a, Mul(b, rest...));
 }
 
 template<typename Scalar, size_t m, size_t n>

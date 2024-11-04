@@ -38,6 +38,10 @@ target_link_libraries(
 target_include_directories(
     Gtk 
     PUBLIC ${PROJECT_SOURCE_DIR}/include
+    PRIVATE ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/core
+            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/math
+            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/random
+            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/scene
 )
 
 

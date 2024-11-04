@@ -14,7 +14,7 @@ class Mat;
 template<typename Scalar, size_t l>
 class Vec {
 public:
-  using Type = Scalar;
+  using ScalarType = Scalar;
   using Iterator = Scalar*;
   using ConstIterator = const Scalar*;
 

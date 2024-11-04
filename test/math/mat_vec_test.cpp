@@ -4,7 +4,7 @@
 #include "mat.h"
 #include "vec.h"
 
-TEST(MatVecTest, Mat) {
+TEST(Math, Mat) {
   {
     Mat2f a{1.f, 2.f, 3.14f, 4.2f};
     Mat2f b{1.f, 2.f, 3.14f, 4.2f};
@@ -141,7 +141,7 @@ TEST(MatVecTest, Mat) {
   }
 }
 
-TEST(MatVecTest, Vec) {
+TEST(Math, Vec) {
   {
     Vec3f a{1.2f, 3.4f, 4.2f};
     Vec3f b = {1.2f, 3.4f, 4.2f};
@@ -244,5 +244,23 @@ TEST(MatVecTest, Vec) {
 
     EXPECT_TRUE(AreNearlyEqual(a, b1));
     EXPECT_TRUE(AreNearlyEqual(a1, b));
+  }
+  {
+    Mat<double, 2, 3> m1 = {1, 2, 3, 4, 5, 6};
+    Mat<double, 3, 3> m2 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    Vec<double, 3> v = {1, 2, 3};
+    Mat<double, 3, 1> m3 = {1, 2, 3};
+
+    auto res1 = Mul(m1, m2, m3);
+    auto res2 = Mul(m1, m2, v);
+    auto res3 = Mul(m1, Mul(m2, m3));
+    auto res4 = Mul(Mul(m1, m2), v);
+
+    Mat<double, 2, 1> res = {228, 516};
+
+    EXPECT_TRUE(AreNearlyEqual(res, res1));
+    EXPECT_TRUE(AreNearlyEqual(res, res2));
+    EXPECT_TRUE(AreNearlyEqual(res, res3));
+    EXPECT_TRUE(AreNearlyEqual(res, res4));
   }
 }

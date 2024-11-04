@@ -1,5 +1,9 @@
 
-add_library(GtkMath gtk_utils.cpp)
+add_library(
+    GtkMath 
+    gtk_utils.cpp
+    transform.cpp
+)
 
 target_include_directories(
     GtkMath
