@@ -15,13 +15,13 @@ struct ProbabilityDensityFunction1D {
   double argMax;
 };
 
-double SampleUniform1D(double lo = 0.f, double hi = 1.f);
+double SampleUniform1D(double lo = 0., double hi = 1.);
 
-std::tuple<double, double> SampleUniform2D(double lo = 0.f, double hi = 1.f);
+std::tuple<double, double> SampleUniform2D(double lo = 0., double hi = 1.);
 
-std::tuple<double, double, double> SampleUniform3D(double lo = 0.f, double hi = 1.f);
+std::tuple<double, double, double> SampleUniform3D(double lo = 0., double hi = 1.);
 
-double SampleNormal1D(double lo = 0.f, double hi = 1.f);
+double SampleNormal1D(double lo = 0., double hi = 1.);
 
 double Sample1D(const ProbabilityDensityFunction1D& pdf);
 
