@@ -1,4 +1,6 @@
 /build/
 /.cache/
+/out/
+/.vs/
 
 *.code-workspace
