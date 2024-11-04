@@ -7,7 +7,7 @@
 #include <numeric>
 
 #include "fmt/core.h"
-
+#include "tiny_obj_loader.h"
 #include "vec.h"
 
 
@@ -17,39 +17,48 @@ using std::end;
 using std::vector;
 
 ObjMesh::ObjMesh(const std::string& file) {
-  if (!reader_.ParseFromFile(file, config_)) {
-    if (!reader_.Error().empty()) {
-      throw std::runtime_error{fmt::format("TinyObjReader: {}", reader_.Error())};
+  using namespace tinyobj;
+  ObjReader reader;
+  ObjReaderConfig config;
+
+  if (!reader.ParseFromFile(file, config)) {
+    if (!reader.Error().empty()) {
+      throw std::runtime_error{fmt::format("TinyObjReader: {}", reader.Error())};
     }
   }
-
-  const auto& attr = reader_.GetAttrib();
 
   auto append = [](const auto& src, auto& dst, auto proj) {
     std::transform(cbegin(src), cend(src), back_inserter(dst), proj);
   };
-
-  // Copy vertices
   auto identity = [](auto x) { return x; };
+
+
+  const auto& attr = reader.GetAttrib();
+  // Copy vertices
   append(attr.vertices, vertices_, identity);
+
   vertexCount_ = vertices_.size() / 3;
 
-  const auto& shapes = reader_.GetShapes();
+  // Record total face count
+  const auto& shapes = reader.GetShapes();
+  for (const auto& s : shapes) {
+    faceCount_ += s.mesh.num_face_vertices.size();
+  }
 
   // Read vertex/normal/texcoord indices from reader
-  // Record total face count
   for (const auto& s : shapes) {
     const auto& ind = s.mesh.indices;
-    faceCount_ += s.mesh.num_face_vertices.size();
 
     if (ind[0].vertex_index >= 0) {
       auto vertexIndexProj = [](auto index) { return index.vertex_index; };
       append(ind, vertexIndices_, vertexIndexProj);
     }
+
     if (ind[0].normal_index >= 0) {
       auto normalIndexProj = [](auto index) { return index.normal_index; };
       append(ind, normalIndices_, normalIndexProj);
     }
+
     if (ind[0].texcoord_index >= 0) {
       auto texCoordIndexProj = [](auto index) { return index.texcoord_index; };
       append(ind, texCoordIndices_, texCoordIndexProj);
@@ -62,7 +71,7 @@ ObjMesh::ObjMesh(const std::string& file) {
     bool reverseWinding = false;
     GenerateVertexNormals(reverseWinding);
   } else {
-
+    // Use normal data from obj file
     auto recordVertexNormals = [&](size_t index) {
       float nx = attr.normals[normalIndices_[index]];
       float ny = attr.normals[normalIndices_[index] + 1];

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "mesh.h"
-#include "tiny_obj_loader.h"
 #include "vec.h"
 
 class ObjMesh : public IMesh {
@@ -36,8 +35,6 @@ public:
 private:
   void GenerateVertexNormals(bool reverseWinding);
 
-  tinyobj::ObjReader reader_;
-  tinyobj::ObjReaderConfig config_;
   IndexArray vertexIndices_;
   IndexArray normalIndices_;
   IndexArray texCoordIndices_;

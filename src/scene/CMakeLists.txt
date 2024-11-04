@@ -8,13 +8,12 @@ add_library(
 
 target_link_libraries(
     GtkScene
-    PUBLIC tinyobjloader
-    PRIVATE fmt
+    PRIVATE tinyobjloader
+            fmt
             GtkMath
 )
 
 target_include_directories(
     GtkScene
-    PUBLIC ${tinyobjloader_include_dir}
-           ${gtk_internal_include_directory}/scene
+    PUBLIC ${gtk_internal_include_directory}/scene
 )
