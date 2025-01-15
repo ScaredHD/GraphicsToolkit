@@ -29,5 +29,10 @@ private:
 
 Transform Compose(const Transform& t1, const Transform& t2);
 
+template<typename T1, typename T2, typename... Ts>
+Transform Compose(const T1& t1, const T2& t2, const Ts&... ts) {
+  return Compose(t1, Compose(t2, ts...));
+}
+
 
 #endif  // TRANSFORM_H
