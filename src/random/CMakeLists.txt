@@ -1,6 +1,7 @@
 add_library(
     GtkRandom
     sample.cpp
+    discrepancy.cpp
 )
 
 target_include_directories(

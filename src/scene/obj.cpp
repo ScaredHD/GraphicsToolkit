@@ -126,44 +126,58 @@ bool ObjMesh::HasVertex() const {
   return !vertices_.empty();
 }
 
-IMesh::VertexArray ObjMesh::Vertices() const {
-  return vertices_;
+size_t ObjMesh::VertexCount() const {
+  return vertices_.size() / 3;
 }
 
-bool ObjMesh::HasNormal() const {
-  return !normals_.empty();
-}
-
-IMesh::NormalArray ObjMesh::Normals() const {
-  NormalArray res;
-  for (const vector<Vec3d>& vn : normals_) {
-    assert(vn.size() == 1);
-    Vec3d n = vn[0];
-    std::copy(begin(n), end(n), back_inserter(res));
-  }
-  return res;
+ITriangleMesh::VertexPos_t ObjMesh::Vertex(VertexIndex_t idx) const {
+  double x = vertices_[3 * idx];
+  double y = vertices_[3 * idx + 1];
+  double z = vertices_[3 * idx + 2];
+  return {x, y, z};
 }
 
 bool ObjMesh::HasIndex() const {
   return !vertexIndices_.empty();
 }
 
-IMesh::IndexArray ObjMesh::Indices() const {
-  return vertexIndices_;
+size_t ObjMesh::FaceCount() const {
+  return vertexIndices_.size() / 3;
+}
+
+ITriangleMesh::FaceIndices_t ObjMesh::FaceIndices(FaceIndex_t idx) const {
+  VertexIndex_t i0 = 3 * idx;
+  VertexIndex_t i1 = 3 * idx + 1;
+  VertexIndex_t i2 = 3 * idx + 2;
+  return {i0, i1, i2};
+}
+
+bool ObjMesh::HasNormal() const {
+  return normals_.empty();
+}
+
+ITriangleMesh::VertexNormal_t ObjMesh::VertexNormal(VertexIndex_t idx) const {
+  assert(normals_[idx].size() == 1 && "Vertex normal count should be one");
+  auto n = normals_[idx][0];
+  return {n[0], n[1], n[2]};
 }
 
 bool ObjMesh::HasColor() const {
   return !colors_.empty();
 }
 
-IMesh::ColorArray ObjMesh::Colors() const {
-  return colors_;
-}
-
-IMesh::TexCoordArray ObjMesh::TexCoords() const {
-  return texCoords_;
+ITriangleMesh::VertexColor_t ObjMesh::VertexColor(VertexIndex_t idx) const {
+  double r = colors_[3 * idx];
+  double g = colors_[3 * idx + 1];
+  double b = colors_[3 * idx + 2];
+  return {r, g, b};
 }
 
 bool ObjMesh::HasTexCoord() const {
   return !texCoords_.empty();
+}
+
+ITriangleMesh::VertexTexCoord_t ObjMesh::VertexTexCoord(VertexIndex_t idx) const {
+  // TODO:
+  return {-1, -1};
 }
