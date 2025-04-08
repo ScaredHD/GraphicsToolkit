@@ -100,7 +100,7 @@ Vec<typename T::ScalarType, 3> HNormalized(const T& v) {
 }
 
 template<typename T, typename = std::enable_if_t<AsColVec<T>::len == 4>>
-Vec<typename T::ScalarType, 3> ToVec3(const T& v) {
+Vec<typename T::ScalarType, 3> Truncate(const T& v) {
   return {v[0], v[1], v[2]};
 }
 

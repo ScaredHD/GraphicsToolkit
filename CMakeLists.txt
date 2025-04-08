@@ -32,7 +32,7 @@ target_link_libraries(
     Gtk
     INTERFACE GtkMath
               GtkRandom
-              GtkScene
+            #   GtkScene
 )
 
 target_include_directories(
@@ -41,7 +41,6 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/core
             ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/math
             ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/random
-            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/scene
 )
 
 

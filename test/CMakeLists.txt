@@ -10,8 +10,12 @@ target_link_libraries(
     PRIVATE GTest::gtest_main
             GtkMath
             GtkRandom
-            GtkScene
             GtkCore
+)
+
+target_include_directories(
+    gtk_tests
+    PRIVATE .
 )
 
 

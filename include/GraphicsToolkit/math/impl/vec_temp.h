@@ -7,7 +7,6 @@
 #include <functional>
 #include <numeric>
 
-
 template<typename Scalar, size_t m, size_t n>
 class Mat;
 
@@ -20,7 +19,11 @@ public:
 
   static constexpr size_t len = l;
 
-  static constexpr Vec Zero() { return {0., 0., 0.}; }
+  static constexpr Vec Zero() { 
+    Vec zeroVec;
+    std::fill(zeroVec.begin(), zeroVec.end(), Scalar{0});
+    return zeroVec;
+  }
 
   template<typename... Scalars>
   Vec(Scalars... args) {
@@ -68,18 +71,12 @@ public:
 
   Vec& operator/=(const Vec& other) { return ComponentwiseOperation(other, std::divides<>{}); }
 
-  template<typename Fn>
-  Vec& ForEachComponent(Fn f) {
-    std::for_each(begin(), end(), f);
-    return *this;
-  }
-
   Vec& operator*=(Scalar x) {
-    return ForEachComponent([x](Scalar& e) { e *= x; });
+    return ForEachComponent(*this, [x](Scalar& e) { e *= x; });
   }
 
   Vec& operator/=(Scalar x) {
-    return ForEachComponent([x](Scalar& e) { e /= x; });
+    return ForEachComponent(*this, [x](Scalar& e) { e /= x; });
   }
 
   Scalar Dot(const Vec& other) const {
@@ -120,5 +117,10 @@ auto cend(const Vec<Scalar, len>& v) {
   return v.cend();
 }
 
+template<typename Scalar, size_t l, typename Fn>
+Vec<Scalar, l>& ForEachComponent(Vec<Scalar, l>& vec, Fn f) {
+  std::for_each(vec.begin(), vec.end(), f);
+  return vec;
+}
 
 #endif  // VEC_TEMP_H

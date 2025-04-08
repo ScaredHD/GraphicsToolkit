@@ -11,6 +11,5 @@
 #include "random/sample.h"
 #include "random/discrepancy.h"
 
-#include "scene/obj.h"
 
 #endif  // GTK_H

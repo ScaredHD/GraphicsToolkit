@@ -20,6 +20,7 @@ Diagnostics:
         readability-uppercase-literal-suffix,
         readability-math-missing-parentheses,
         modernize-use-nodiscard,
+        readability-function-cognitive-complexity
       ]
   UnusedIncludes: None
 
