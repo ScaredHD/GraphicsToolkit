@@ -1,15 +1,7 @@
-#ifndef GTK_H
-#define GTK_H
+#pragma once
 
-#include "core/ref_ptr.h"
-
-#include "math/gtk_utils.h"
-#include "math/mat.h"
-#include "math/vec.h"
-#include "math/transform.h"
+#include "math/gtk_math.h"
 
 #include "random/sample.h"
 #include "random/discrepancy.h"
 
-
-#endif  // GTK_H

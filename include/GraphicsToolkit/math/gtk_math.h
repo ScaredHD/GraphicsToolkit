@@ -1,8 +1,11 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
 #include <cmath>
 #include <limits>
+
+#include "linarg/mat.h"
+#include "linarg/vec.h"
+#include "linarg/transform.h"
 
 namespace gtk
 {
@@ -91,6 +94,3 @@ T Smootherstep(T l, T r, T x)
   x = Clamp((x - l) / (r - l));
   return x * x * x * (x * (x * T{6} - T{15}) + T{10});
 }
-
-
-#endif  // UTILS_H

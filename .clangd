@@ -19,6 +19,7 @@ Diagnostics:
         readability-braces-around-statements,
         readability-uppercase-literal-suffix,
         readability-math-missing-parentheses,
+        readability-avoid-nested-conditional-operator,
         modernize-use-nodiscard,
         readability-function-cognitive-complexity
       ]
