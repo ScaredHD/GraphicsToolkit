@@ -1,5 +1,5 @@
 
-file(GLOB_RECURSE math_src /*.cpp)
+file(GLOB_RECURSE math_src *.cpp)
 
 add_library(
     GtkMath 

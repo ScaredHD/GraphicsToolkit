@@ -5,12 +5,16 @@ add_executable(
     ${test_src}
 )
 
+target_compile_definitions(
+    gtk_tests
+    PRIVATE GTK_TEST
+)
+
 target_link_libraries(
     gtk_tests
     PRIVATE GTest::gtest_main
             GtkMath
             GtkRandom
-            GtkCore
 )
 
 target_include_directories(

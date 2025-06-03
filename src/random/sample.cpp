@@ -5,7 +5,7 @@
 
 #include <fmt/core.h>
 
-#include "gtk_utils.h"
+#include "gtk_math.h"
 
 namespace {
 
@@ -36,7 +36,7 @@ ProbabilityDensityFunction1D::ProbabilityDensityFunction1D(double domainMin, dou
 
 double SampleUniform1D(double lo, double hi) {
   double x = s_dist(s_gen);
-  return MapRange(x, 0., 1., lo, hi);
+  return Remap(x, 0., 1., lo, hi);
 }
 
 std::tuple<double, double> SampleUniform2D(double lo, double hi) {
@@ -53,10 +53,10 @@ std::tuple<double, double, double> SampleUniform3D(double lo, double hi) {
 }
 
 double Sample1D(const ProbabilityDensityFunction1D& pdf) {
-  return RejectionSample1D(pdf.domainMin, pdf.domainMax, pdf, pdf.UpperBound());
+  return RejectionSample1D(pdf.domainMin, pdf.domainMax, std::ref(pdf), pdf.UpperBound());
 }
 
-double RejectionSample1D(double lo, double hi, const ProbabilityDensityFunction1D& pdf,
+double RejectionSample1D(double lo, double hi, const std::function<double(double)>& pdf,
                          double upperBound) {
   while (true) {
     double x = SampleUniform1D(lo, hi);

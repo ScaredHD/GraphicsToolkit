@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "gtk_utils.h"
+#include "gtk_math.h"
 #include "sample.h"
 
 #include <algorithm>

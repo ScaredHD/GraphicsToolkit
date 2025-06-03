@@ -2,10 +2,11 @@
 
 #include <cmath>
 #include <limits>
+#include <functional>
 
-#include "linarg/mat.h"
-#include "linarg/vec.h"
-#include "linarg/transform.h"
+// #include "linarg/mat.h"
+// #include "linarg/vec.h"
+// #include "linarg/transform.h"
 
 namespace gtk
 {
@@ -44,29 +45,16 @@ T Wrap(T val, T lo, T hi)
 }
 
 template<typename T>
-T MapRange(T x, T l0, T r0, T l1, T r1)
-{
-  return l1 + ((x - l0) * (r1 - l1) / (r0 - l0));
-}
-
-
-template<typename T>
-T MapRangeClamped(T x, T l0, T r0, T l1, T r1)
-{
-  x = Clamp(x, l0, r0);
-  MapRange(x, l0, r0, l1, r1);
-}
-
-template<typename T>
 T Remap(T x, T l0, T r0, T l1, T r1)
 {
-  return MapRange(x, l0, r0, l1, r1);
+  return l1 + ((x - l0) * (r1 - l1) / (r0 - l0));
 }
 
 template<typename T>
 T RemapClamped(T x, T l0, T r0, T l1, T r1)
 {
-  return MapRangeClamped(x, l0, r0, l1, r1);
+  x = Clamp(x, l0, r0);
+  Remap(x, l0, r0, l1, r1);
 }
 
 template<typename T>
