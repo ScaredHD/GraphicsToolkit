@@ -21,7 +21,8 @@ Diagnostics:
         readability-math-missing-parentheses,
         readability-avoid-nested-conditional-operator,
         modernize-use-nodiscard,
-        readability-function-cognitive-complexity
+        readability-function-cognitive-complexity,
+        readability-named-parameter,
       ]
   UnusedIncludes: None
 

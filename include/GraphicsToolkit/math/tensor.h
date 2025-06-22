@@ -95,29 +95,6 @@ private:
   std::array<Scalar, DimensionType::count> data;
 };
 
-template<typename Scalar, typename DimensionType>
-auto TensorFromDimension()
-{
-  using RetType = typename DimensionType::template TensorType<Scalar>;
-  return RetType{};
-}
-
-// Runtime broadcasting of tensors to a common dimension
-template<
-  typename ToDimType,
-  typename FromTensorType,
-  typename ToTensorType = typename ToDimType::TensorType>
-ToTensorType BroadcastTensor(const FromTensorType& t)
-{
-  using FromDimType = typename FromTensorType::DimensionType;
-  ToTensorType result;
-  // TODO:
-  return result;
-}
-
-
-template<typename T>
-using Dim = typename T::DimensionType;
 
 template<typename T>
 constexpr size_t Rank = T::rank;

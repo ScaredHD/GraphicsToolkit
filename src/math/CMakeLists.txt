@@ -8,6 +8,6 @@ add_library(
 
 target_include_directories(
     GtkMath
-    PUBLIC ${gtk_internal_include_directory}/math
+    PUBLIC ${gtk_inner_include_dir}/math
            linarg
 )

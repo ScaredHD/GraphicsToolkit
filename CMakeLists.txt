@@ -19,6 +19,9 @@ if(${IS_TOP_LEVEL_PROJECT})
     add_subdirectory(test)
 endif()
 
+set(gtk_outer_include_dir ${PROJECT_SOURCE_DIR}/include)
+set(gtk_inner_include_dir ${PROJECT_SOURCE_DIR}/include/GraphicsToolkit)
+
 add_subdirectory(ext)
 
 # All submodule libraries
@@ -26,7 +29,7 @@ add_subdirectory(src)
 
 
 # Combine all modules to single target 'Gtk'
-add_library(Gtk gtk.cpp)
+add_library(Gtk INTERFACE)
 
 target_link_libraries(
     Gtk
@@ -36,10 +39,7 @@ target_link_libraries(
 
 target_include_directories(
     Gtk 
-    PUBLIC ${PROJECT_SOURCE_DIR}/include
-    PRIVATE 
-            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/math
-            ${PROJECT_SOURCE_DIR}/include/GraphicsToolKit/random
+    INTERFACE ${gtk_outer_include_dir}
 )
 
 
@@ -51,6 +51,8 @@ add_executable(
 
 target_link_libraries(
     gtk_playground
-    PRIVATE Gtk
-            fmt
+    PRIVATE 
+        fmt
+        GtkMath
+        GtkCore
 )

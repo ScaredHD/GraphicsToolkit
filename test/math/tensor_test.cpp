@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include "tensor_operations.h"
 
 
 template<typename T1, typename T2>
@@ -37,12 +36,9 @@ TEST(Math, Tensor)
   }
 
   {
+    // Addition
     Tensor<float, 3, 3> m{{1.f, 2.f, 3.f}, {4.f, 5.f, 6.f}, {7.f, 8.f, 9.f}};
     Tensor<double> s = 4.f;
-    Tensor<float, 3, 3> sum = m + s;
-
-
-
   }
 
 }
