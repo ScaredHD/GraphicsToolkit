@@ -1,0 +1,124 @@
+#pragma once
+
+#include <type_traits>
+
+namespace gtk
+{
+
+template<typename T, T... Values>
+struct IntegerSequence {
+};
+
+template<typename T>
+struct IsIntegerSequenceEmpty {
+  static constexpr bool value = false;
+};
+
+template<typename T>
+struct IsIntegerSequenceEmpty<IntegerSequence<T>> {
+  static constexpr bool value = true;
+};
+
+template<typename T>
+inline constexpr bool IsIntegerSequenceEmptyV = IsIntegerSequenceEmpty<T>::value;
+
+template<size_t index, typename T, T Head, T... Tail>
+struct IntegerSequenceGet {
+  static_assert(index < sizeof...(Tail) + 1, "Index out of bounds");
+  using Type = T;
+  static constexpr T value = IntegerSequenceGet<index - 1, T, Tail...>::value;
+};
+
+template<typename T, T Head, T... Tail>
+struct IntegerSequenceGet<0, T, Head, Tail...> {
+  using Type = T;
+  static constexpr T value = Head;
+};
+
+template<typename T, T Head, T...>
+struct IntegerSequenceFront {
+  using Type = T;
+  static constexpr T value = Head;
+};
+
+template<typename List, typename T, T val>
+struct IntegerSequencePushFront;
+
+template<typename T, T... values, T newValue>
+struct IntegerSequencePushFront<IntegerSequence<T, values...>, T, newValue> {
+  using Type = IntegerSequence<T, newValue, values...>;
+};
+
+template<typename List, typename T, T val>
+struct IntegerSequencePushBack;
+
+template<typename T, T... values, T newValue>
+struct IntegerSequencePushBack<IntegerSequence<T, values...>, T, newValue> {
+  using Type = IntegerSequence<T, values..., newValue>;
+};
+
+template<typename Seq, bool isEmpty = IsIntegerSequenceEmptyV<Seq>>
+struct IntegerSequenceReverse;
+
+template<typename T>
+struct IntegerSequenceReverse<IntegerSequence<T>, true> {
+  using Type = IntegerSequence<T>;
+};
+
+template<typename T, T head, T... values>
+struct IntegerSequenceReverse<IntegerSequence<T, head, values...>, false> {
+  using Type = typename IntegerSequencePushBack<
+    typename IntegerSequenceReverse<IntegerSequence<T, values...>>::Type,
+    T,
+    head>::Type;
+};
+
+template<typename T, T current, T target, int stride>
+struct IntegerSequenceTraits {
+  static constexpr bool isIncreasing = (stride > 0);
+  static constexpr bool isLast =
+    (isIncreasing ? target - current < stride : current - target < -stride);
+};
+
+template<typename T, T current, T target, int stride, bool isLast, T... accValues>
+struct IntegerSequenceHelper {
+  using Type = typename IntegerSequenceHelper<
+    T,
+    current + stride,
+    target,
+    stride,
+    IntegerSequenceTraits<T, current, target, stride>::isLast,
+    accValues...,
+    current>::Type;
+};
+
+template<typename T, T current, T target, int stride, T... accValues>
+struct IntegerSequenceHelper<T, current, target, stride, true, accValues...> {
+  using Type = IntegerSequence<T, accValues...>;
+};
+
+
+template<typename T, T current, T target, int stride>
+using IntegerSequenceGenerator = typename IntegerSequenceHelper<
+  T,
+  current,
+  target,
+  stride,
+  IntegerSequenceTraits<T, current, target, stride>::isLast>::Type;
+
+
+template<typename T, T count>
+struct MakeIntegerSequence {
+  using Type = IntegerSequenceGenerator<T, 0, count - 1, 1>;
+};
+
+template<size_t... indices>
+using IndexSequence = IntegerSequence<size_t, indices...>;
+
+template<size_t count>
+using MakeIndexSequence = typename MakeIntegerSequence<size_t, count>::Type;
+
+
+
+
+}  // namespace gtk

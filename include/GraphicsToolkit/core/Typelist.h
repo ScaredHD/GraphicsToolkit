@@ -30,6 +30,19 @@ struct EnableIf<true, T> {
 template<bool cond, typename T = void>
 using EnableIfT = typename EnableIf<cond, T>::Type;
 
+template<typename T, typename U>
+struct IsSame {
+  static constexpr bool value = false;
+};
+
+template<typename T>
+struct IsSame<T, T> {
+  static constexpr bool value = true;
+};
+
+template<typename T, typename U>
+inline constexpr bool IsSameV = IsSame<T, U>::value;
+
 }  // namespace
 
 namespace gtk
@@ -96,7 +109,8 @@ using PopFrontType = typename TypelistPopFront<T>::Type;
 
 template<typename T>
 struct TypelistSize {
-  static constexpr size_t value = IsTypelistEmptyV<T> ? 0 : 1 + TypelistSize<PopFrontType<T>>::value;
+  static constexpr size_t value = IsTypelistEmptyV<T> ? 0
+                                                      : 1 + TypelistSize<PopFrontType<T>>::value;
 };
 
 template<typename T>
@@ -269,6 +283,17 @@ public:
 
 template<typename List, template<typename T> class Pred>
 using FilterType = typename TypelistFilter<List, Pred>::Type;
+
+template<typename List, typename T>
+struct TypelistContains {
+  static constexpr bool value =
+    (IsTypelistEmptyV<List>          ? false
+     : (IsSameV<FrontType<List>, T>) ? true
+                                     : (TypelistContains<PopFrontType<List>, T>::value));
+};
+
+template<typename List, typename T>
+inline constexpr bool TypelistContainsV = TypelistContains<List, T>::value;
 
 
 }  // namespace gtk

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <iostream>
 #include <utility>
 
+#include "IntegerSequence.h"
 #include "Typelist.h"
+
 
 namespace gtk
 {
@@ -47,6 +50,11 @@ struct Tuple<Head, Tail...> {
 template<typename... Elements>
 Tuple(Elements...) -> Tuple<Elements...>;
 
+template<typename... Elements>
+constexpr auto MakeTuple(Elements&&... elements)
+{
+  return Tuple<std::decay_t<Elements>...>(std::forward<Elements>(elements)...);
+}
 
 template<>
 struct IsTypelistEmpty<Tuple<>> {
@@ -74,13 +82,38 @@ struct TypelistPushBack<Tuple<Elements...>, NewElement> {
 };
 
 template<size_t index, typename... Elements>
-constexpr GetType<Tuple<Elements...>, index> Get(const Tuple<Elements...>& tuple)
+constexpr GetType<Tuple<Elements...>, index> Get(const Tuple<Elements...>& t)
 {
   if constexpr (index == 0) {
-    return tuple.head;
+    return t.head;
   } else {
-    return Get<index - 1>(tuple.tail);
+    return Get<index - 1>(t.tail);
   }
+}
+
+template<size_t i, size_t j, size_t... rest, typename... Elements>
+constexpr auto Get(const Tuple<Elements...>& t)
+{
+  return MakeTuple(Get<i>(t), Get<j>(t), Get<rest>(t)...);
+}
+
+template<typename I>
+struct IndexedGetHelper {
+};
+
+template<size_t... indices>
+struct IndexedGetHelper<IndexSequence<indices...>> {
+  template<typename... Elements>
+  static constexpr auto Impl(const Tuple<Elements...>& t)
+  {
+    return MakeTuple(Get<indices>(t)...);
+  }
+};
+
+template<typename I, typename... Elements>
+constexpr auto Get(const Tuple<Elements...>& t)
+{
+  return IndexedGetHelper<I>::Impl(t);
 }
 
 template<typename E, typename... Elements>
@@ -237,6 +270,26 @@ template<typename... E1, typename... E2>
 constexpr bool operator>=(const Tuple<E1...>& lhs, const Tuple<E2...>& rhs)
 {
   return !(lhs < rhs);
+}
+
+
+std::ostream& Print(std::ostream& os, const Tuple<>&, bool first = true)
+{
+  return os << (first ? "(" : ")");
+}
+
+template<typename Head, typename... Tail>
+std::ostream& Print(std::ostream& os, const Tuple<Head, Tail...>& tuple, bool first = true)
+{
+  os << (first ? "(" : ", ");
+  os << tuple.head;
+  return Print(os, tuple.tail, false);
+}
+
+template<typename... Elements>
+std::ostream& operator<<(std::ostream& os, const Tuple<Elements...>& tuple)
+{
+  return Print(os, tuple);
 }
 
 
