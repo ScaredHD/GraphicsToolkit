@@ -2,24 +2,172 @@
 
 #include <algorithm>
 
-#include "../core/Tuple.h"
+#include "../core/IntegerSequence.h"
 
-template<typename Scalar, size_t... dims>
-class Tensor;
 
-// Tensor dimension
 template<size_t... dims>
-struct TDimension : gtk::Tuple<decltype(dims)...> {
+struct TDimension;
+
+namespace
+{
+template<typename D>
+struct ToSeqHelper;
+
+template<size_t... dims>
+struct ToSeqHelper<TDimension<dims...>> {
+  using Type = gtk::IntegerSequence<size_t, dims...>;
+};
+
+template<typename D>
+using ToSeq = typename ToSeqHelper<D>::Type;
+
+template<typename S>
+struct ToDimHelper;
+
+template<size_t... integers>
+struct ToDimHelper<gtk::IntegerSequence<size_t, integers...>> {
+  using Type = TDimension<integers...>;
+};
+
+template<typename S>
+using ToDim = typename ToDimHelper<S>::Type;
+
+}  // namespace
+
+template<typename D, size_t i>
+inline constexpr size_t DimGet = gtk::IntegerSequenceGetV<ToSeq<D>, i>;
+
+template<size_t... dims>
+struct TDimension {
 
   static constexpr size_t rank = sizeof...(dims);
-
   static constexpr size_t count = (dims * ...);
-
-  constexpr size_t operator[](size_t i) { return gtk::Get<i>(*this); }
 
   static constexpr bool isScalar = (rank == 0);
   static constexpr bool isVector = (rank == 1);
   static constexpr bool isMatrix = (rank == 2);
   static constexpr bool isTensor = (rank > 2);
 
+  template<typename IndexSeq, typename Dim, size_t currentIndex, size_t tailProduct, size_t result>
+  struct FlattenedIndexHelper;
+
+  // Recursive case for the recursion
+  template<size_t... indices, size_t... ds, size_t currentIndex, size_t tailProduct, size_t result>
+  struct FlattenedIndexHelper<
+    gtk::IndexSequence<indices...>,
+    TDimension<ds...>,
+    currentIndex,
+    tailProduct,
+    result> {
+    using D = TDimension<ds...>;
+    using S = gtk::IndexSequence<indices...>;
+    static constexpr size_t currentDim = DimGet<D, currentIndex>;
+    static constexpr size_t currentIndexValue = gtk::IntegerSequenceGetV<S, currentIndex>;
+    static constexpr size_t value = FlattenedIndexHelper<
+      S,
+      D,
+      currentIndex - 1,
+      tailProduct * currentDim,
+      result + tailProduct * currentIndexValue>::value;
+  };
+
+  // Base case for the recursion
+  template<size_t i, size_t... indices, size_t... ds, size_t tailProduct, size_t result>
+  struct FlattenedIndexHelper<
+    gtk::IndexSequence<i, indices...>,
+    TDimension<ds...>,
+    0,
+    tailProduct,
+    result> {
+    static constexpr size_t value = result + i * tailProduct;
+  };
+
+
+  template<size_t... indices>
+  static constexpr size_t FlattenedIndex()
+  {
+    using S = gtk::IndexSequence<indices...>;
+    using D = TDimension<dims...>;
+    constexpr auto rank = sizeof...(indices);
+    constexpr size_t startIndex = rank - 1;
+    constexpr size_t startIndexValue = gtk::IntegerSequenceGetV<S, startIndex>;
+    // constexpr size_t initSum = gtk::IntegerSequenceGetV<S, startIndex>;
+    return FlattenedIndexHelper<S, D, startIndexValue, 1, 0>::value;
+  }
 };
+
+template<typename D, typename T0, typename... Ts>
+static constexpr size_t FlattenedIndex(const T0& i, const Ts&... indices)
+{
+  // TODO:
+  return 0;
+}
+
+
+template<typename D>
+inline constexpr size_t DimFront = DimGet<D, 0>;
+
+template<typename D, size_t e>
+using DimPushFront = ToDim<gtk::IntegerSequencePushFrontT<ToSeq<D>, size_t, e>>;
+
+template<typename D>
+using DimPopFront = ToDim<gtk::IntegerSequencePopFrontT<ToSeq<D>>>;
+
+template<typename D>
+using DimReverse = ToDim<gtk::IntegerSequenceReverseT<ToSeq<D>>>;
+
+
+template<typename S, typename L, size_t padRank>
+struct PadHelper {
+  using Temp = typename PadHelper<S, L, padRank - 1>::PaddedS;
+  using PaddedS = DimPushFront<Temp, 1>;
+};
+
+template<typename S, typename L>
+struct PadHelper<S, L, 0> {
+  using PaddedS = S;
+};
+
+// Pad two dimensions to the same rank by adding leading 1s to the smaller dimension
+template<typename D1, typename D2>
+struct PadDim {
+private:
+  static constexpr bool isD1Smaller = (D1::rank < D2::rank);
+  static constexpr size_t padRank = isD1Smaller ? (D2::rank - D1::rank) : (D1::rank - D2::rank);
+
+public:
+  using D1Padded =
+    std::conditional_t<isD1Smaller, typename PadHelper<D1, D2, padRank>::PaddedS, D1>;
+
+  using D2Padded =
+    std::conditional_t<isD1Smaller, D2, typename PadHelper<D2, D1, padRank>::PaddedS>;
+};
+
+template<typename D1, typename D2>
+struct BroadcastDim;
+
+template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
+struct BroadcastDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
+  using Type = DimPushFront<
+    typename BroadcastDim<TDimension<dims1...>, TDimension<dims2...>>::Type,
+    std::max(front1, front2)>;
+};
+
+template<typename D1, typename D2>
+using BroadcastDimT = typename BroadcastDim<D1, D2>::Type;
+
+template<typename D1, typename D2>
+struct IsCompatibleDim;
+
+template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
+struct IsCompatibleDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
+private:
+  static constexpr bool cond1 = (front1 == front2) || (front1 == 1) || (front2 == 1);
+  static constexpr bool cond2 = IsCompatibleDim<TDimension<dims1...>, TDimension<dims2...>>::value;
+
+public:
+  static constexpr bool value = cond1 && cond2;
+};
+
+template<typename D1, typename D2>
+inline constexpr bool IsCompatibleDimV = IsCompatibleDim<D1, D2>::value;

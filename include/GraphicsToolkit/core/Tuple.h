@@ -56,6 +56,23 @@ constexpr auto MakeTuple(Elements&&... elements)
   return Tuple<std::decay_t<Elements>...>(std::forward<Elements>(elements)...);
 }
 
+template<typename T>
+struct IntegerSequenceTupleHelper {
+};
+
+template<typename T, T... integers>
+struct IntegerSequenceTupleHelper<IntegerSequence<T, integers...>> {
+  using Type = Tuple<decltype(integers)...>;
+  static constexpr auto value = Type{integers...};
+};
+
+template<typename T>
+constexpr auto IntegerSequenceTuple()
+{
+  return IntegerSequenceTupleHelper<T>::value;
+}
+
+
 template<>
 struct IsTypelistEmpty<Tuple<>> {
   static constexpr bool value = true;
