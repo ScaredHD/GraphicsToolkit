@@ -99,7 +99,27 @@ struct TypelistPushBack<Tuple<Elements...>, NewElement> {
 };
 
 template<size_t index, typename... Elements>
-constexpr GetType<Tuple<Elements...>, index> Get(const Tuple<Elements...>& t)
+constexpr const GetType<Tuple<Elements...>, index>& Get(const Tuple<Elements...>& t)
+{
+  if constexpr (index == 0) {
+    return t.head;
+  } else {
+    return Get<index - 1>(t.tail);
+  }
+}
+
+template<size_t index, typename... Elements>
+constexpr GetType<Tuple<Elements...>, index>& Get(Tuple<Elements...>& t)
+{
+  if constexpr (index == 0) {
+    return t.head;
+  } else {
+    return Get<index - 1>(t.tail);
+  }
+}
+
+template<size_t index, typename... Elements>
+constexpr GetType<Tuple<Elements...>, index>&& Get(Tuple<Elements...>&& t)
 {
   if constexpr (index == 0) {
     return t.head;

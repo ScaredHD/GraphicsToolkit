@@ -1,8 +1,9 @@
 #pragma once
 
 #include <algorithm>
+// #include <numeric>
 
-#include "../core/IntegerSequence.h"
+#include "../core/Tuple.h"
 
 
 template<size_t... dims>
@@ -31,6 +32,16 @@ struct ToDimHelper<gtk::IntegerSequence<size_t, integers...>> {
 
 template<typename S>
 using ToDim = typename ToDimHelper<S>::Type;
+
+template<size_t n>
+constexpr size_t InnerProduct(const std::array<size_t, n>& a, const std::array<size_t, n>& b)
+{
+  size_t sum = 0;
+  for (size_t i = 0; i < n; ++i) {
+    sum += a[i] * b[i];
+  }
+  return sum;
+}
 
 }  // namespace
 
@@ -83,6 +94,7 @@ struct TDimension {
   };
 
 
+  // Compile-time only
   template<size_t... indices>
   static constexpr size_t FlattenedIndex()
   {
@@ -94,14 +106,37 @@ struct TDimension {
     // constexpr size_t initSum = gtk::IntegerSequenceGetV<S, startIndex>;
     return FlattenedIndexHelper<S, D, startIndexValue, 1, 0>::value;
   }
-};
 
-template<typename D, typename T0, typename... Ts>
-static constexpr size_t FlattenedIndex(const T0& i, const Ts&... indices)
-{
-  // TODO:
-  return 0;
-}
+  static constexpr std::array<size_t, rank> TailProducts()
+  {
+    std::array<size_t, rank> products{};
+    constexpr std::array<size_t, rank> dimensions = {dims...};
+    size_t product = 1;
+    for (size_t i = rank - 1; i < rank; --i) {
+      products[i] = product;
+      product *= dimensions[i];
+    }
+    return products;
+  }
+
+  // Can be used at runtime
+  template<typename... Indices>
+  static constexpr size_t FlattenedIndex(Indices... indices)
+  {
+    std::array<size_t, rank> tailProducts = TailProducts();
+    std::array<size_t, rank> index = {static_cast<size_t>(indices)...};
+
+    return InnerProduct(tailProducts, index);
+  }
+
+  // static constexpr gtk::Tuple<decltype(dims)...> UnflattenedIndex(size_t flatIndex) {
+  //   std::array<size_t, rank> dimensions{dims...};
+  //   gtk::Tuple<decltype(dims)...> index;
+  //   for (size_t i = rank - 1; i >= 0; --i){
+  //     Get<i>(index) = flatIndex % dimensions[i];
+  //   }
+  // }
+};
 
 
 template<typename D>

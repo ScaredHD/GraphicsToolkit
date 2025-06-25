@@ -114,7 +114,7 @@ struct TypelistSize {
 };
 
 template<typename T>
-using SizeV = typename TypelistSize<T>::value;
+inline constexpr size_t SizeV = TypelistSize<T>::value;
 
 // TODO: Add out of bounds checks for Get
 template<typename T, size_t index>
