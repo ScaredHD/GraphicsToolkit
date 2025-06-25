@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/gtk_math.h"
+#include "math/GtkMath.h"
 
-#include "random/sample.h"
-#include "random/discrepancy.h"
+#include "random/Sample.h"
+#include "random/Discrepancy.h"
 

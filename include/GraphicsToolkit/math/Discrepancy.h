@@ -1,5 +1,4 @@
-#ifndef DISCREPANCY_H_
-#define DISCREPANCY_H_
+#pragma once
 
 #include <vector>
 
@@ -43,5 +42,3 @@ PointSet2D Halton2DSequence(size_t count);
 
 PointSet3D Halton3DSequence(size_t count);
 
-
-#endif  // DISCREPANCY_H_

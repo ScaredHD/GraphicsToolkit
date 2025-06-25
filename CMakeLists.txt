@@ -34,7 +34,6 @@ add_library(Gtk INTERFACE)
 target_link_libraries(
     Gtk
     INTERFACE GtkMath
-              GtkRandom
 )
 
 target_include_directories(

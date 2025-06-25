@@ -1,11 +1,11 @@
-#include "sample.h"
+#include "Sample.h"
 
 #include <chrono>
 #include <random>
 
 #include <fmt/core.h>
 
-#include "gtk_math.h"
+#include "GtkMath.h"
 
 namespace {
 

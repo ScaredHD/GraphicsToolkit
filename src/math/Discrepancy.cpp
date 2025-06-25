@@ -1,4 +1,4 @@
-#include "discrepancy.h"
+#include "Discrepancy.h"
 
 double Corput(size_t i, unsigned int base) {
   double res = 0.0;

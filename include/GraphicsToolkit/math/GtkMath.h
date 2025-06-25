@@ -4,10 +4,6 @@
 #include <limits>
 #include <functional>
 
-// #include "linarg/mat.h"
-// #include "linarg/vec.h"
-// #include "linarg/transform.h"
-
 namespace gtk
 {
 constexpr double inf = std::numeric_limits<double>::infinity();

@@ -1,5 +1,4 @@
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#pragma once
 
 #include <stdexcept>
 #include <tuple>
@@ -43,5 +42,3 @@ struct NormalDistribution : public ProbabilityDensityFunction1D {
   double sigma;
 };
 
-
-#endif  // SAMPLE_H

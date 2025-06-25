@@ -1,10 +1,10 @@
 
-add_executable(gui_test WIN32
-    gui_test.cpp
+add_executable(GuiTest WIN32
+    GuiTest.cpp
 )
 
 target_link_libraries(
-    gui_test
+    GuiTest
     PUBLIC
         imgui 
         d3d11.lib
