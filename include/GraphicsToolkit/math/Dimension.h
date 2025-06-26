@@ -3,7 +3,7 @@
 #include <algorithm>
 // #include <numeric>
 
-#include "../core/Tuple.h"
+#include "Tuple.h"
 
 
 template<size_t... dims>

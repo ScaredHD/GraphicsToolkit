@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+
 #include <iostream>
 
 #include "Tuple.h"
@@ -26,7 +28,7 @@ struct IsOdd {
 
 using namespace gtk;
 
-int main()
+void test()
 {
   {
 
@@ -132,4 +134,9 @@ int main()
                   IntegerSequenceGenerator<int, 8, -3, -2>, IntegerSequence<int, 8, 6, 4, 2, 0, -2>>
     );
   }
+}
+
+TEST(Core, TypelistTuple)
+{
+  test();
 }

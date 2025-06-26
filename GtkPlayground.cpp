@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "GraphicsToolkit/core/Tuple.h"
-#include "GraphicsToolkit/math/Tensor.h"
+#include "GraphicsToolkit/Core/Tuple.h"
+#include "GraphicsToolkit/Math/Tensor.h"
 
 
 using namespace gtk;

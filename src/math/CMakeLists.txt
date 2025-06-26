@@ -16,5 +16,5 @@ target_link_libraries(
 target_include_directories(
     GtkMath
     PUBLIC
-        ${gtk_inner_include_dir}/math
+        ${gtk_inner_include_dir}/Math
 )
