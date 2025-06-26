@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "tensor.h"
-#include "Tuple.h"
+#include "GraphicsToolkit/core/Tuple.h"
+#include "GraphicsToolkit/math/Tensor.h"
 
 
 using namespace gtk;
@@ -58,5 +58,9 @@ int main()
       }
       std::cout << "\n";
     }
+    for (size_t i = 0; i < decltype(t)::DimensionType::count; ++i) {
+      std::cout << decltype(t)::DimensionType::UnflattenedIndex(i) << ", ";
+    }
+    std::cout << "\n";
   }
 }

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "gtk_math.h"
-#include "sample.h"
+#include "GtkMath.h"
+#include "Sample.h"
 
 #include <algorithm>
 #include <vector>

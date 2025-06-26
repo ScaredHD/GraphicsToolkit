@@ -33,7 +33,9 @@ add_library(Gtk INTERFACE)
 
 target_link_libraries(
     Gtk
-    INTERFACE GtkMath
+    INTERFACE 
+        GtkCore
+        GtkMath
 )
 
 target_include_directories(
@@ -44,14 +46,13 @@ target_include_directories(
 
 # playgound executable
 add_executable(
-    gtk_playground
-    gtk_playground.cpp
+    GtkPlayground
+    GtkPlayground.cpp
 )
 
 target_link_libraries(
-    gtk_playground
+    GtkPlayground
     PRIVATE 
         fmt
-        GtkMath
-        GtkCore
+        Gtk
 )

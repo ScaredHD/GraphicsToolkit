@@ -153,6 +153,32 @@ constexpr auto Get(const Tuple<Elements...>& t)
   return IndexedGetHelper<I>::Impl(t);
 }
 
+template<typename Head, typename... Elements>
+constexpr auto& Get(Tuple<Head, Elements...>& t, size_t index)
+{
+  if (index == 0) {
+    return t.head;
+  }
+  if constexpr (sizeof...(Elements) != 0) {
+    return Get(t.tail, index - 1);
+  } else {
+    throw std::out_of_range("Index out of range in Tuple::Get");
+  }
+}
+
+template<typename Head, typename... Elements>
+constexpr const auto& Get(const Tuple<Head, Elements...>& t, size_t index)
+{
+  if (index == 0) {
+    return t.head;
+  }
+  if constexpr (sizeof...(Elements) != 0) {
+    return Get(t.tail, index - 1);
+  } else {
+    throw std::out_of_range("Index out of range in Tuple::Get");
+  }
+}
+
 template<typename E, typename... Elements>
 constexpr E Front(const Tuple<E, Elements...>& tuple)
 {
@@ -310,7 +336,7 @@ constexpr bool operator>=(const Tuple<E1...>& lhs, const Tuple<E2...>& rhs)
 }
 
 
-std::ostream& Print(std::ostream& os, const Tuple<>&, bool first = true)
+inline std::ostream& Print(std::ostream& os, const Tuple<>&, bool first = true)
 {
   return os << (first ? "(" : ")");
 }

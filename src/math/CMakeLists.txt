@@ -7,10 +7,14 @@ add_library(
 )
 
 target_link_libraries(
-    GtkMath PRIVATE fmt
+    GtkMath 
+    PRIVATE 
+        fmt
+        GtkCore
 )
 
 target_include_directories(
     GtkMath
-    PUBLIC ${gtk_inner_include_dir}/math
+    PUBLIC
+        ${gtk_inner_include_dir}/math
 )

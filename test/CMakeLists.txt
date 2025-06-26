@@ -1,28 +1,23 @@
 file(GLOB_RECURSE test_src *.cpp)
 
 add_executable(
-    gtk_tests
+    GtkTest
     ${test_src}
 )
 
 target_compile_definitions(
-    gtk_tests
+    GtkTest
     PRIVATE GTK_TEST
 )
 
 target_link_libraries(
-    gtk_tests
+    GtkTest
     PRIVATE GTest::gtest_main
             GtkMath
-            GtkRandom
             GtkCore
 )
 
-target_include_directories(
-    gtk_tests
-    PRIVATE .
-)
 
 
 include(GoogleTest)
-gtest_discover_tests(gtk_tests)
+gtest_discover_tests(GtkTest)

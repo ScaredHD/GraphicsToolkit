@@ -129,15 +129,23 @@ struct TDimension {
     return InnerProduct(tailProducts, index);
   }
 
-  // static constexpr gtk::Tuple<decltype(dims)...> UnflattenedIndex(size_t flatIndex) {
-  //   std::array<size_t, rank> dimensions{dims...};
-  //   gtk::Tuple<decltype(dims)...> index;
-  //   for (size_t i = rank - 1; i >= 0; --i){
-  //     Get<i>(index) = flatIndex % dimensions[i];
-  //   }
-  // }
+  static constexpr gtk::Tuple<decltype(dims)...> UnflattenedIndex(size_t flatIndex)
+  {
+    std::array<size_t, rank> dimensions{dims...};
+    gtk::Tuple<decltype(dims)...> index;
+    for (size_t i = rank - 1; i > 0; --i) {
+      Get(index, i) = flatIndex % dimensions[i];
+      flatIndex /= dimensions[i];
+    }
+    Get(index, 0) = flatIndex % dimensions[0];
+    flatIndex /= dimensions[0];
+    return index;
+  }
 };
 
+template<>
+struct TDimension<> : TDimension<1> {
+};
 
 template<typename D>
 inline constexpr size_t DimFront = DimGet<D, 0>;

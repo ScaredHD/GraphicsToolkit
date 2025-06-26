@@ -2,6 +2,6 @@
 
 #include "math/GtkMath.h"
 
-#include "random/Sample.h"
-#include "random/Discrepancy.h"
+#include "math/Sample.h"
+#include "math/Discrepancy.h"
 

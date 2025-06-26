@@ -1,7 +1,7 @@
-#include "tensor.h"
 
 #include <gtest/gtest.h>
 
+#include "Tensor.h"
 
 
 template<typename T1, typename T2>
