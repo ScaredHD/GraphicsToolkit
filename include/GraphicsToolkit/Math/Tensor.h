@@ -2,6 +2,7 @@
 #include <array>
 
 #include "Dimension.h"
+#include "Tuple.h"
 
 template<typename Scalar, size_t... dims>
 class Tensor
@@ -124,10 +125,22 @@ struct MakeTensorType<Scalar, TDimension<dims...>> {
 };
 
 template<typename Scalar, typename Dim>
-using MakeTensorTypeT = typename MakeTensorType<Scalar, Dim>::Type;
+using MakeTensorFromDimensionT = typename MakeTensorType<Scalar, Dim>::Type;
 
 
-template<typename FromTensor, typename ToDimension>
+template<typename D>
+struct DimensionAsTuple;
+
+template<size_t... dims>
+struct DimensionAsTuple<TDimension<dims...>> {
+  static constexpr gtk::Tuple<decltype(dims)...> value = gtk::MakeTuple(dims...);
+};
+
+template<typename D>
+inline constexpr auto DimensionAsTupleV = DimensionAsTuple<D>::value;
+
+
+template<typename ToDimension, typename FromTensor>
 auto Cast(const FromTensor& t)
 {
   using FromDimension = typename FromTensor::DimensionType;
@@ -136,6 +149,18 @@ auto Cast(const FromTensor& t)
   static_assert(IsCompatibleDimV<FromDimension, ToDimension>);
   static_assert(std::is_same_v<BroadcastDimT<FromDimension, ToDimension>, ToDimension>);
 
-  using ToTensor = MakeTensorTypeT<typename FromTensor::ScalarType, ToDimension>;
-
+  using ToTensor = MakeTensorFromDimensionT<typename FromTensor::ScalarType, ToDimension>;
+  ToTensor result;
+  for (size_t i = 0; i < ToDimension::count; ++i) {
+    auto mdIndex = ToDimension::UnflattenedIndex(i);
+    auto fromDim = DimensionAsTupleV<FromDimension>;
+    // For broadcasting: if source dimension is 1, use index 0 (broadcast)
+    // Otherwise, clamp target index to source dimension bounds
+    mdIndex = gtk::Transform(mdIndex, fromDim, [](size_t targetIdx, size_t sourceDim) { 
+      return sourceDim == 1 ? 0 : std::min(targetIdx, sourceDim - 1); 
+    });
+    auto index = FromDimension::FlattenedIndex(mdIndex);
+    result[i] = t[index];
+  }
+  return result;
 }

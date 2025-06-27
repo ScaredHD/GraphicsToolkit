@@ -129,6 +129,18 @@ struct TDimension {
     return InnerProduct(tailProducts, index);
   }
 
+  template<typename ... E>
+  static constexpr size_t FlattenedIndex(const gtk::Tuple<E...>& index)
+  {
+    std::array<size_t, rank> tailProducts = TailProducts();
+    std::array<size_t, rank> indices;
+    for (size_t i = 0; i < rank; ++i) {
+      indices[i] = gtk::Get(index, i);
+    }
+    return InnerProduct(tailProducts, indices);
+  }
+
+
   static constexpr gtk::Tuple<decltype(dims)...> UnflattenedIndex(size_t flatIndex)
   {
     std::array<size_t, rank> dimensions{dims...};
@@ -189,6 +201,11 @@ public:
 template<typename D1, typename D2>
 struct BroadcastDim;
 
+template<>
+struct BroadcastDim<TDimension<>, TDimension<>> {
+  using Type = TDimension<>;
+};
+
 template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
 struct BroadcastDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
   using Type = DimPushFront<
@@ -201,6 +218,11 @@ using BroadcastDimT = typename BroadcastDim<D1, D2>::Type;
 
 template<typename D1, typename D2>
 struct IsCompatibleDim;
+
+template<>
+struct IsCompatibleDim<TDimension<>, TDimension<>> {
+  static constexpr bool value = true;
+};
 
 template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
 struct IsCompatibleDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
