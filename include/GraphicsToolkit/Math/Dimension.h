@@ -229,22 +229,10 @@ template<size_t n, size_t... dims>
 struct IsCompatibleDim<TDimension<n, dims...>, TDimension<>> {
   static constexpr bool value = true;
 };
-
-// template<size_t n, size_t... dims>
-// struct IsCompatibleDim<TDimension<n, dims...>, TDimension<1>> {
-//   static constexpr bool value = true;
-// };
-
 template<size_t n, size_t... dims>
 struct IsCompatibleDim<TDimension<>, TDimension<n, dims...>> {
   static constexpr bool value = true;
 };
-
-// template<size_t n, size_t... dims>
-// struct IsCompatibleDim<TDimension<1>, TDimension<n, dims...>> {
-//   static constexpr bool value = true;
-// };
-
 
 template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
 struct IsCompatibleDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
