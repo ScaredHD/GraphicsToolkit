@@ -161,5 +161,42 @@ using IndexSequence = IntegerSequence<size_t, indices...>;
 template<size_t count>
 using MakeIndexSequence = typename MakeIntegerSequence<size_t, count>::Type;
 
+template<typename List, template<typename U = typename List::ElementType, U x = U{}> class Pred>
+struct IntegerSequenceFilter;
+
+template<typename T, template<typename U, U> class Pred>
+struct IntegerSequenceFilter<IntegerSequence<T>, Pred> {
+  using Type = IntegerSequence<T>;
+};
+
+template<typename T, T head, T... values, template<typename U, U> class Pred>
+struct IntegerSequenceFilter<IntegerSequence<T, head, values...>, Pred> {
+  using FilteredTail = typename IntegerSequenceFilter<IntegerSequence<T, values...>, Pred>::Type;
+  using Type = std::conditional_t<
+    Pred<T, head>::value,
+    IntegerSequencePushFrontT<FilteredTail, T, head>,
+    FilteredTail>;
+};
+
+template<typename List, template<typename U = typename List::ElementType, U x = U{}> class Pred>
+using IntegerSequenceFilterT = typename IntegerSequenceFilter<List, Pred>::Type;
+
+template<typename T, T x>
+struct IsEven {
+  static constexpr bool value = (x % 2 == 0);
+};
+
+template<typename T, T x>
+struct IsOdd {
+  static constexpr bool value = (x % 2 != 0);
+};
+
+template<typename T, T x>
+struct Equals {
+  template<T y>
+  struct Int {
+    static constexpr bool value = (x == y);
+  };
+};
 
 }  // namespace gtk

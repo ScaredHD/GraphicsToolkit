@@ -171,6 +171,16 @@ using DimPopFront = ToDim<gtk::IntegerSequencePopFrontT<ToSeq<D>>>;
 template<typename D>
 using DimReverse = ToDim<gtk::IntegerSequenceReverseT<ToSeq<D>>>;
 
+template<typename D, size_t e>
+struct DimRemoveElement {
+  template<typename T, T val>
+  struct Equals {
+    static constexpr bool value = (e == val);
+  };
+
+  using Type = ToDim<gtk::IntegerSequenceFilterT<ToSeq<D>, Equals>>;
+};
+
 
 template<typename S, typename L, size_t padRank>
 struct PadHelper {
