@@ -64,6 +64,48 @@ static void test()
   }
 
   {
+    // Compile-time Flattened Index Tests
+    using Matrix = TDimension<3, 4>;
+    using Tensor3D = TDimension<2, 3, 4>;
+    
+    // Test compile-time matrix indexing
+    static_assert(Matrix::FlattenedIndex<0, 0>() == 0);
+    static_assert(Matrix::FlattenedIndex<0, 1>() == 1);
+    static_assert(Matrix::FlattenedIndex<0, 2>() == 2);
+    static_assert(Matrix::FlattenedIndex<0, 3>() == 3);
+    static_assert(Matrix::FlattenedIndex<1, 0>() == 4);
+    static_assert(Matrix::FlattenedIndex<1, 1>() == 5);
+    static_assert(Matrix::FlattenedIndex<1, 2>() == 6);
+    static_assert(Matrix::FlattenedIndex<2, 0>() == 8);
+    static_assert(Matrix::FlattenedIndex<2, 3>() == 11);
+    
+    // Test compile-time 3D tensor indexing
+    static_assert(Tensor3D::FlattenedIndex<0, 0, 0>() == 0);
+    static_assert(Tensor3D::FlattenedIndex<0, 0, 1>() == 1);
+    static_assert(Tensor3D::FlattenedIndex<0, 0, 2>() == 2);
+    static_assert(Tensor3D::FlattenedIndex<0, 1, 0>() == 4);
+    static_assert(Tensor3D::FlattenedIndex<0, 2, 0>() == 8);
+    static_assert(Tensor3D::FlattenedIndex<1, 0, 0>() == 12);
+    static_assert(Tensor3D::FlattenedIndex<1, 1, 1>() == 17);
+    static_assert(Tensor3D::FlattenedIndex<1, 2, 3>() == 23);
+    
+    // Test edge cases
+    using Vector = TDimension<5>;
+    static_assert(Vector::FlattenedIndex<0>() == 0);
+    static_assert(Vector::FlattenedIndex<1>() == 1);
+    static_assert(Vector::FlattenedIndex<4>() == 4);
+    
+    // Test larger tensor
+    using Tensor4D = TDimension<2, 3, 4, 5>;
+    static_assert(Tensor4D::FlattenedIndex<0, 0, 0, 0>() == 0);
+    static_assert(Tensor4D::FlattenedIndex<0, 0, 0, 1>() == 1);
+    static_assert(Tensor4D::FlattenedIndex<0, 0, 1, 0>() == 5);
+    static_assert(Tensor4D::FlattenedIndex<0, 1, 0, 0>() == 20);
+    static_assert(Tensor4D::FlattenedIndex<1, 0, 0, 0>() == 60);
+    static_assert(Tensor4D::FlattenedIndex<1, 2, 3, 4>() == 119);
+  }
+
+  {
     // Flattened Index Tests (Runtime only - compile-time version seems to have issues)
     using Matrix = TDimension<3, 4>;
 

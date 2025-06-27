@@ -102,9 +102,7 @@ struct TDimension {
     using D = TDimension<dims...>;
     constexpr auto rank = sizeof...(indices);
     constexpr size_t startIndex = rank - 1;
-    constexpr size_t startIndexValue = gtk::IntegerSequenceGetV<S, startIndex>;
-    // constexpr size_t initSum = gtk::IntegerSequenceGetV<S, startIndex>;
-    return FlattenedIndexHelper<S, D, startIndexValue, 1, 0>::value;
+    return FlattenedIndexHelper<S, D, startIndex, 1, 0>::value;
   }
 
   static constexpr std::array<size_t, rank> TailProducts()
