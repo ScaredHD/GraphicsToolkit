@@ -10,6 +10,8 @@ class Tensor
 public:
   using ScalarType = Scalar;
   using DimensionType = TDimension<dims...>;
+  static constexpr size_t rank = DimensionType::rank;
+  static constexpr size_t count = DimensionType::count;
 
   // Constructors
 
@@ -43,7 +45,7 @@ public:
 
   // Conversion from another tensor type
   template<typename OtherScalar, size_t... otherDims>
-  Tensor(const Tensor<OtherScalar, otherDims...>& other)
+  constexpr Tensor(const Tensor<OtherScalar, otherDims...>& other)
   {
     static_assert(
       DimensionType::count <= TDimension<otherDims...>::count,
@@ -54,7 +56,7 @@ public:
   }
 
   // Implicit conversion to scalar
-  template<typename D = DimensionType, typename = std::enable_if_t<D::isScalar>>
+  template<typename D = DimensionType, typename = std::enable_if_t<D::count == 1>>
   constexpr operator ScalarType() const
   {
     return data[0];
@@ -108,6 +110,53 @@ private:
   std::array<Scalar, DimensionType::count> data;
 };
 
+template<typename Scalar>
+class Tensor<Scalar> : public Tensor<Scalar, 1>
+{
+public:
+  Tensor(Scalar x) : Tensor<Scalar, 1>(x) {}
+};
+
+template<typename T>
+struct IsTensorClass {
+  static constexpr bool value = false;
+};
+
+template<typename Scalar, size_t... dims>
+struct IsTensorClass<Tensor<Scalar, dims...>> {
+  static constexpr bool value = true;
+};
+
+template<typename T>
+static constexpr bool IsTensorClassV = IsTensorClass<T>::value;
+
+
+template<typename Scalar, size_t... dims, typename OtherScalar, size_t... otherDims>
+constexpr bool
+operator==(const Tensor<Scalar, dims...>& lhs, const Tensor<OtherScalar, otherDims...>& rhs)
+{
+  using Dl = typename Tensor<Scalar, dims...>::DimensionType;
+  using Dr = typename Tensor<OtherScalar, otherDims...>::DimensionType;
+  if (Dl::count != Dr::count || Dl::rank != Dr::rank ||
+      std::is_same_v<Scalar, OtherScalar> == false) {
+    return false;
+  }
+
+  for (size_t i = 0; i < Dl::count; ++i) {
+    if (lhs[i] != rhs[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template<typename S1, size_t... dims1, typename S2, size_t... dims2>
+constexpr bool operator!=(const Tensor<S1, dims1...>& lhs, const Tensor<S2, dims2...>& rhs)
+{
+  return !(lhs == rhs);
+}
+
 
 template<typename T>
 inline constexpr size_t Rank = T::DimensionType::rank;
@@ -141,7 +190,7 @@ inline constexpr auto DimensionAsTupleV = DimensionAsTuple<D>::value;
 
 
 template<typename ToDimension, typename FromTensor>
-auto Cast(const FromTensor& t)
+constexpr auto Cast(const FromTensor& t)
 {
   using FromDimension = typename FromTensor::DimensionType;
 
@@ -149,18 +198,20 @@ auto Cast(const FromTensor& t)
   static_assert(IsCompatibleDimV<FromDimension, ToDimension>);
   static_assert(std::is_same_v<BroadcastDimT<FromDimension, ToDimension>, ToDimension>);
 
+  using FromDimensionPadded = typename PadDim<FromDimension, ToDimension>::D1Padded;
+
   using ToTensor = MakeTensorFromDimensionT<typename FromTensor::ScalarType, ToDimension>;
   ToTensor result;
+
   for (size_t i = 0; i < ToDimension::count; ++i) {
-    auto mdIndex = ToDimension::UnflattenedIndex(i);
-    auto fromDim = DimensionAsTupleV<FromDimension>;
-    // For broadcasting: if source dimension is 1, use index 0 (broadcast)
-    // Otherwise, clamp target index to source dimension bounds
-    mdIndex = gtk::Transform(mdIndex, fromDim, [](size_t targetIdx, size_t sourceDim) { 
-      return sourceDim == 1 ? 0 : std::min(targetIdx, sourceDim - 1); 
-    });
-    auto index = FromDimension::FlattenedIndex(mdIndex);
-    result[i] = t[index];
+    auto toMultiIndexTuple = ToDimension::UnflattenedIndex(i);
+    auto fromDimTuple = DimensionAsTupleV<FromDimensionPadded>;
+    auto clampedMultiIndexTuple = gtk::Transform(
+      toMultiIndexTuple, fromDimTuple,
+      [](size_t index, size_t dim) { return std::min(index, dim - 1); }
+    );
+    auto fromIndex = FromDimension::FlattenedIndex(clampedMultiIndexTuple);
+    result[i] = t[fromIndex];
   }
   return result;
 }

@@ -129,7 +129,7 @@ struct TDimension {
     return InnerProduct(tailProducts, index);
   }
 
-  template<typename ... E>
+  template<typename... E>
   static constexpr size_t FlattenedIndex(const gtk::Tuple<E...>& index)
   {
     std::array<size_t, rank> tailProducts = TailProducts();
@@ -199,22 +199,23 @@ public:
 };
 
 template<typename D1, typename D2>
-struct BroadcastDim;
+struct BroadcastAlignedDim;
 
 template<>
-struct BroadcastDim<TDimension<>, TDimension<>> {
+struct BroadcastAlignedDim<TDimension<>, TDimension<>> {
   using Type = TDimension<>;
 };
 
 template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
-struct BroadcastDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
+struct BroadcastAlignedDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
   using Type = DimPushFront<
-    typename BroadcastDim<TDimension<dims1...>, TDimension<dims2...>>::Type,
+    typename BroadcastAlignedDim<TDimension<dims1...>, TDimension<dims2...>>::Type,
     std::max(front1, front2)>;
 };
 
 template<typename D1, typename D2>
-using BroadcastDimT = typename BroadcastDim<D1, D2>::Type;
+using BroadcastAlignedDimT = typename BroadcastAlignedDim<D1, D2>::Type;
+
 
 template<typename D1, typename D2>
 struct IsCompatibleDim;
@@ -223,6 +224,27 @@ template<>
 struct IsCompatibleDim<TDimension<>, TDimension<>> {
   static constexpr bool value = true;
 };
+
+template<size_t n, size_t... dims>
+struct IsCompatibleDim<TDimension<n, dims...>, TDimension<>> {
+  static constexpr bool value = true;
+};
+
+// template<size_t n, size_t... dims>
+// struct IsCompatibleDim<TDimension<n, dims...>, TDimension<1>> {
+//   static constexpr bool value = true;
+// };
+
+template<size_t n, size_t... dims>
+struct IsCompatibleDim<TDimension<>, TDimension<n, dims...>> {
+  static constexpr bool value = true;
+};
+
+// template<size_t n, size_t... dims>
+// struct IsCompatibleDim<TDimension<1>, TDimension<n, dims...>> {
+//   static constexpr bool value = true;
+// };
+
 
 template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
 struct IsCompatibleDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
@@ -236,3 +258,16 @@ public:
 
 template<typename D1, typename D2>
 inline constexpr bool IsCompatibleDimV = IsCompatibleDim<D1, D2>::value;
+
+template<typename D1, typename D2, bool isCompatible = IsCompatibleDimV<D1, D2>>
+struct BroadcastDimension;
+
+template<typename D1, typename D2>
+struct BroadcastDimension<D1, D2, true> {
+  using PD1 = typename PadDim<D1, D2>::D1Padded;
+  using PD2 = typename PadDim<D1, D2>::D2Padded;
+  using Type = BroadcastAlignedDimT<PD1, PD2>;
+};
+
+template<typename D1, typename D2>
+using BroadcastDimT = typename BroadcastDimension<D1, D2>::Type;

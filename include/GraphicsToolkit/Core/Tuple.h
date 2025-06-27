@@ -257,21 +257,21 @@ constexpr auto Transform(const Tuple<>&, const Tuple<>&, BinaryOp&&)
   return Tuple<>{};
 }
 
-template<typename... E1, typename... E2, typename BinaryOp>
-constexpr auto Transform(const Tuple<E1...>& t1, const Tuple<E2...>& t2, BinaryOp&& op)
+template<typename H1, typename H2, typename BinaryOp>
+constexpr auto Transform(const Tuple<H1>& t1, const Tuple<H2>& t2, BinaryOp&& op)
 {
-  if constexpr (sizeof...(E1) != sizeof...(E2)) {
-    throw std::invalid_argument("Tuples must have the same size for Transform");
-  } else if constexpr (sizeof...(E1) == 0) {
-    return Tuple<>{};
-  } else {
-    return PushFront(
-      Transform(t1.tail, t2.tail, std::forward<BinaryOp>(op)),
-      std::forward<BinaryOp>(op)(t1.head, t2.head)
-    );
-  }
+  return Tuple<decltype(op(t1.head, t2.head))>{op(t1.head, t2.head)};
 }
 
+template<typename H1, typename... E1, typename H2, typename... E2, typename BinaryOp>
+constexpr auto Transform(const Tuple<H1, E1...>& t1, const Tuple<H2, E2...>& t2, BinaryOp&& op)
+{
+  static_assert(sizeof...(E1) == sizeof...(E2), "Tuples must have the same size for Transform");
+  return PushFront(
+    Transform(t1.tail, t2.tail, std::forward<BinaryOp>(op)),
+    std::forward<BinaryOp>(op)(t1.head, t2.head)
+  );
+}
 
 template<typename... Elements, typename F, typename I>
 constexpr auto FoldLeft(const Tuple<Elements...>& t, F&& op, I&& init)
