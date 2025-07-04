@@ -108,41 +108,49 @@ struct IntegerSequenceReverse<IntegerSequence<T, head, values...>, false> {
 template<typename S>
 using IntegerSequenceReverseT = typename IntegerSequenceReverse<S>::Type;
 
-template<typename T, T current, T target, int stride>
-struct IntegerSequenceTraits {
-  static constexpr bool isIncreasing = (stride > 0);
-  static constexpr bool isLast =
-    (isIncreasing ? target - current < stride : current - target < -stride);
+template<typename S>
+struct IntegerSequencePopBack {
+  using Type = typename IntegerSequenceReverse<
+    typename IntegerSequencePopFront<typename IntegerSequenceReverse<S>::Type>::Type>::Type;
 };
+
+template<typename S>
+using IntegerSequencePopBackT = typename IntegerSequencePopBack<S>::Type;
 
 template<typename S, typename F>
 struct IntegerSequenceTransform;
 
 template<typename T, typename F, T... values>
 struct IntegerSequenceTransform<IntegerSequence<T, values...>, F> {
-  using Type = IntegerSequence<T, F(values)...>;
+  using Type = IntegerSequence<T, F{}(values)...>;
+};
+
+template<typename T, T current, T target, int stride, typename = std::enable_if_t<stride != 0>>
+struct IntegerSequenceTraits {
+  static constexpr bool isIncreasing = (stride > 0);
+  static constexpr bool isLast =
+    (isIncreasing ? target - current < stride : current - target < -stride);
 };
 
 template<typename T, T current, T target, int stride, bool isLast, T... accValues>
-struct IntegerSequenceHelper {
-  using Type = typename IntegerSequenceHelper<
+struct IntegerSequenceGeneratorHelper {
+  using Type = typename IntegerSequenceGeneratorHelper<
     T,
     current + stride,
     target,
     stride,
-    IntegerSequenceTraits<T, current, target, stride>::isLast,
+    IntegerSequenceTraits<T, current + stride, target, stride>::isLast,
     accValues...,
     current>::Type;
 };
 
 template<typename T, T current, T target, int stride, T... accValues>
-struct IntegerSequenceHelper<T, current, target, stride, true, accValues...> {
-  using Type = IntegerSequence<T, accValues...>;
+struct IntegerSequenceGeneratorHelper<T, current, target, stride, true, accValues...> {
+  using Type = IntegerSequence<T, accValues..., current>;
 };
 
-
 template<typename T, T current, T target, int stride>
-using IntegerSequenceGenerator = typename IntegerSequenceHelper<
+using IntegerSequenceGenerator = typename IntegerSequenceGeneratorHelper<
   T,
   current,
   target,
@@ -150,9 +158,20 @@ using IntegerSequenceGenerator = typename IntegerSequenceHelper<
   IntegerSequenceTraits<T, current, target, stride>::isLast>::Type;
 
 
-template<typename T, T count>
+template<typename T, size_t count>
 struct MakeIntegerSequence {
-  using Type = IntegerSequenceGenerator<T, 0, count - 1, 1>;
+private:
+  static constexpr T first = 0;
+  static constexpr T last = static_cast<T>(count - 1);
+  static constexpr T stride = 1;
+
+public:
+  using Type = IntegerSequenceGenerator<T, first, last, stride>;
+};
+
+template<typename T>
+struct MakeIntegerSequence<T, 0> {
+  using Type = IntegerSequence<T>;
 };
 
 template<size_t... indices>
@@ -192,11 +211,32 @@ struct IsOdd {
 };
 
 template<typename T, T x>
-struct Equals {
+struct CompareWith {
   template<T y>
-  struct Int {
+  struct Equal {
     static constexpr bool value = (x == y);
   };
+  template<T y>
+  struct NotEqual {
+    static constexpr bool value = (x != y);
+  };
+  template<T y>
+  struct LessThan {
+    static constexpr bool value = (x < y);
+  };
+  template<T y>
+  struct GreaterThan {
+    static constexpr bool value = (x > y);
+  };
+  template<T y>
+  struct LessThanOrEqual {
+    static constexpr bool value = (x <= y);
+  };
+  template<T y>
+  struct GreaterThanOrEqual {
+    static constexpr bool value = (x >= y);
+  };
 };
+
 
 }  // namespace gtk

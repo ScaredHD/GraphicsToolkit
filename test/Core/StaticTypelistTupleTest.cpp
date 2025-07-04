@@ -28,21 +28,31 @@ struct IsOddType {
   static constexpr bool value = T::value % 2 != 0;
 };
 
-// Predicate templates for testing Equals
+// Predicate templates for testing Compare
 template<typename T, T val>
-using EqualsZero = typename gtk::Equals<T, val>::template Int<0>;
+struct EqualsZero {
+  static constexpr bool value = gtk::CompareWith<T, 0>::template Equal<val>::value;
+};
 
 template<typename T, T val>
-using EqualsOne = typename gtk::Equals<T, val>::template Int<1>;
+struct EqualsOne {
+  static constexpr bool value = gtk::CompareWith<T, 1>::template Equal<val>::value;
+};
 
 template<typename T, T val>
-using EqualsTwo = typename gtk::Equals<T, val>::template Int<2>;
+struct EqualsTwo {
+  static constexpr bool value = gtk::CompareWith<T, 2>::template Equal<val>::value;
+};
 
 template<typename T, T val>
-using EqualsFive = typename gtk::Equals<T, val>::template Int<5>;
+struct EqualsFive {
+  static constexpr bool value = gtk::CompareWith<T, 5>::template Equal<val>::value;
+};
 
 template<typename T, T val>
-using EqualsNegOne = typename gtk::Equals<T, val>::template Int<-1>;
+struct EqualsNegOne {
+  static constexpr bool value = gtk::CompareWith<T, -1>::template Equal<val>::value;
+};
 
 }  // namespace
 using namespace gtk;
