@@ -153,8 +153,45 @@ struct TDimension {
   }
 };
 
+// Specialization for scalar dimensions (rank 0)
 template<>
-struct TDimension<> : TDimension<1> {
+struct TDimension<> {
+  static constexpr size_t rank = 0;
+  static constexpr size_t count = 1;
+
+  static constexpr bool isScalar = true;
+  static constexpr bool isVector = false;
+  static constexpr bool isMatrix = false;
+  static constexpr bool isTensor = false;
+
+  // TailProducts for scalar - return empty array (can't use std::array<size_t, 0>)
+  // Instead, we'll make it a no-op since it's not used for scalars
+  static constexpr void TailProducts()
+  {
+    // No tail products for scalar
+  }
+
+  // FlattenedIndex for scalar - no indices needed, always returns 0
+  static constexpr size_t FlattenedIndex() { return 0; }
+
+  // Runtime version with variadic args (should be empty for scalar)
+  template<typename... Indices>
+  static constexpr size_t FlattenedIndex(Indices... indices)
+  {
+    static_assert(sizeof...(indices) == 0, "Scalar dimension expects no indices");
+    return 0;
+  }
+
+  // Runtime version with tuple (empty tuple for scalar)
+  template<typename... E>
+  static constexpr size_t FlattenedIndex(const gtk::Tuple<E...>& index)
+  {
+    static_assert(sizeof...(E) == 0, "Scalar dimension expects empty tuple");
+    return 0;
+  }
+
+  // UnflattenedIndex for scalar returns empty tuple
+  static constexpr gtk::Tuple<> UnflattenedIndex(size_t) { return {}; }
 };
 
 template<typename D>
@@ -169,14 +206,17 @@ using DimPopFront = ToDim<gtk::IntegerSequencePopFrontT<ToSeq<D>>>;
 template<typename D>
 using DimReverse = ToDim<gtk::IntegerSequenceReverseT<ToSeq<D>>>;
 
+template<typename D>
+using DimPopBack = ToDim<gtk::IntegerSequencePopBackT<ToSeq<D>>>;
+
 template<typename D, size_t e>
 struct DimRemoveElement {
-  template<typename T, T val>
-  struct Equals {
-    static constexpr bool value = (e == val);
+  template<typename T, T x>
+  struct NotEquals {
+    static constexpr bool value = (x != e);
   };
 
-  using Type = ToDim<gtk::IntegerSequenceFilterT<ToSeq<D>, Equals>>;
+  using Type = ToDim<gtk::IntegerSequenceFilterT<ToSeq<D>, NotEquals>>;
 };
 
 
@@ -206,64 +246,160 @@ public:
     std::conditional_t<isD1Smaller, D2, typename PadHelper<D2, D1, padRank>::PaddedS>;
 };
 
-template<typename D1, typename D2>
-struct BroadcastAlignedDim;
+template<typename FromDim, typename ToDim>
+struct CanBroadcastHelper {
+  static constexpr size_t from0 = DimFront<FromDim>;
+  static constexpr size_t to0 = DimFront<ToDim>;
+  static constexpr bool headCompatible = (from0 == to0) || (from0 == 1);
+
+  using fromRest = DimPopFront<FromDim>;
+  using toRest = DimPopFront<ToDim>;
+  static constexpr bool restCompatible = CanBroadcastHelper<fromRest, toRest>::value;
+
+  static constexpr bool value = headCompatible && restCompatible;
+};
 
 template<>
-struct BroadcastAlignedDim<TDimension<>, TDimension<>> {
-  using Type = TDimension<>;
-};
-
-template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
-struct BroadcastAlignedDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
-  using Type = DimPushFront<
-    typename BroadcastAlignedDim<TDimension<dims1...>, TDimension<dims2...>>::Type,
-    std::max(front1, front2)>;
-};
-
-template<typename D1, typename D2>
-using BroadcastAlignedDimT = typename BroadcastAlignedDim<D1, D2>::Type;
-
-
-template<typename D1, typename D2>
-struct IsCompatibleDim;
-
-template<>
-struct IsCompatibleDim<TDimension<>, TDimension<>> {
+struct CanBroadcastHelper<TDimension<>, TDimension<>> {
   static constexpr bool value = true;
 };
 
-template<size_t n, size_t... dims>
-struct IsCompatibleDim<TDimension<n, dims...>, TDimension<>> {
-  static constexpr bool value = true;
-};
-template<size_t n, size_t... dims>
-struct IsCompatibleDim<TDimension<>, TDimension<n, dims...>> {
-  static constexpr bool value = true;
+template<typename FromDim>
+struct CanBroadcastHelper<FromDim, TDimension<>> {
+  static constexpr bool value = false;
 };
 
-template<size_t front1, size_t... dims1, size_t front2, size_t... dims2>
-struct IsCompatibleDim<TDimension<front1, dims1...>, TDimension<front2, dims2...>> {
+// Directional broadcasting
+template<typename FromDim, typename ToDim, bool validRank = (FromDim::rank <= ToDim::rank)>
+struct CanBroadcast {
+  static constexpr bool value = false;  // Default: invalid rank means no broadcasting
+};
+
+// Specialization for valid rank cases
+template<typename FromDim, typename ToDim>
+struct CanBroadcast<FromDim, ToDim, true> {
 private:
-  static constexpr bool cond1 = (front1 == front2) || (front1 == 1) || (front2 == 1);
-  static constexpr bool cond2 = IsCompatibleDim<TDimension<dims1...>, TDimension<dims2...>>::value;
+  using FromDimPadded = typename PadDim<FromDim, ToDim>::D1Padded;
 
 public:
-  static constexpr bool value = cond1 && cond2;
+  static constexpr bool value = CanBroadcastHelper<FromDimPadded, ToDim>::value;
+};
+
+template<typename D, size_t popFrontCount, size_t popBackCount>
+struct DimPopFrontAndBack {
+  // First pop all front elements, then pop all back elements
+  using AfterPopFront = typename DimPopFrontAndBack<D, popFrontCount, 0>::Type;
+  using Type = typename DimPopFrontAndBack<AfterPopFront, 0, popBackCount>::Type;
+};
+
+template<typename D>
+struct DimPopFrontAndBack<D, 0, 0> {
+  using Type = D;
+};
+
+template<typename D, size_t popFrontCount>
+struct DimPopFrontAndBack<D, popFrontCount, 0> {
+  using Type = typename DimPopFrontAndBack<DimPopFront<D>, popFrontCount - 1, 0>::Type;
+};
+
+template<typename D, size_t popBackCount>
+struct DimPopFrontAndBack<D, 0, popBackCount> {
+  using Type = typename DimPopFrontAndBack<DimPopBack<D>, 0, popBackCount - 1>::Type;
+};
+
+template<typename D, size_t count, size_t r = D::rank, typename = std::enable_if_t<(count <= r)>>
+struct DimExtractFront {
+  static constexpr size_t popCount = r - count;
+  using Type = typename DimPopFrontAndBack<D, 0, popCount>::Type;
+};
+
+template<typename D, size_t count, size_t r = D::rank, typename = std::enable_if_t<(count <= r)>>
+struct DimExtractBack {
+  static constexpr size_t popCount = r - count;
+  using Type = typename DimPopFrontAndBack<D, popCount, 0>::Type;
 };
 
 template<typename D1, typename D2>
-inline constexpr bool IsCompatibleDimV = IsCompatibleDim<D1, D2>::value;
+struct DimConcat;
 
-template<typename D1, typename D2, bool isCompatible = IsCompatibleDimV<D1, D2>>
-struct BroadcastDimension;
+template<size_t... dims1, size_t... dims2>
+struct DimConcat<TDimension<dims1...>, TDimension<dims2...>> {
+  using Type = TDimension<dims1..., dims2...>;
+};
 
-template<typename D1, typename D2>
-struct BroadcastDimension<D1, D2, true> {
-  using PD1 = typename PadDim<D1, D2>::D1Padded;
-  using PD2 = typename PadDim<D1, D2>::D2Padded;
-  using Type = BroadcastAlignedDimT<PD1, PD2>;
+template<typename D, size_t start, size_t len>
+struct SubDimHelper {
+  static constexpr size_t popFrontCount = start;
+  static constexpr size_t popBackCount = D::rank - (start + len);
+  using Type = typename DimPopFrontAndBack<D, popFrontCount, popBackCount>::Type;
+  using Head = typename DimExtractFront<D, popFrontCount>::Type;
+  using Tail = typename DimExtractBack<D, popBackCount>::Type;
+  using Complement = typename DimConcat<Head, Tail>::Type;
+};
+
+template<>
+struct SubDimHelper<TDimension<>, 0, 0> {
+  using Type = TDimension<>;
+  using Complement = TDimension<>;
+};
+
+template<typename D, size_t start>
+struct SubDimHelper<D, start, 0> {
+  using Type = TDimension<>;
+  using Complement = D;
+};
+
+template<
+  typename D,
+  size_t start,
+  size_t len,
+  bool isEmpty = (D::rank == 0 && start == 0 && len == 0),
+  bool validRange = (start < D::rank && start + len <= D::rank),
+  typename = std::enable_if_t<isEmpty || validRange>>
+struct SubDim {
+  using Type = typename SubDimHelper<D, start, len>::Type;
+  using Complement = typename SubDimHelper<D, start, len>::Complement;
+};
+
+template<typename D1, typename D2, bool valid>
+struct ContainsDimHelper {
+  using D1Heads = typename DimExtractFront<D1, D2::rank>::Type;
+  static constexpr bool headsMatch = std::is_same_v<D1Heads, D2>;
+  using D1Tail = DimPopFront<D1>;
+  using D1TailTest = ContainsDimHelper<D1Tail, D2, (D1Tail::rank >= D2::rank)>;
+  static constexpr bool value = headsMatch || D1TailTest::value;
+  static constexpr size_t index = (headsMatch ? 0 : D1TailTest::index + 1);  // +1 for the head
 };
 
 template<typename D1, typename D2>
-using BroadcastDimT = typename BroadcastDimension<D1, D2>::Type;
+struct ContainsDimHelper<D1, D2, false> {
+  static constexpr bool value = false;
+  static constexpr size_t index = 0;  // Default index when not contained
+};
+
+template<typename D1>
+struct ContainsDimHelper<D1, TDimension<>, true> {
+  static constexpr bool value = true;  // Any dimension contains empty dimension
+  static constexpr size_t index = 0;
+};
+
+template<typename D1, typename D2>
+struct ContainsDim {
+  static constexpr bool value = ContainsDimHelper<D1, D2, (D1::rank >= D2::rank)>::value;
+  static constexpr size_t index = ContainsDimHelper<D1, D2, (D1::rank >= D2::rank)>::index;
+};
+
+template<typename FromDim, typename ToDim>
+struct CanDegenerate {
+private:
+  using SearchResult = ContainsDim<FromDim, ToDim>;
+  static constexpr bool found = SearchResult::value;
+  static constexpr size_t foundAtIndex = SearchResult::index;
+  static constexpr bool isDowncast = (FromDim::rank > ToDim::rank);
+  using Rest = typename SubDim<FromDim, foundAtIndex, ToDim::rank>::Complement;
+  static constexpr bool restIsEmpty = (Rest::rank == 0);
+  static constexpr bool restAreAllOnes = DimRemoveElement<Rest, 1>::Type::rank == 0;
+
+public:
+  static constexpr bool value = isDowncast && found && (restIsEmpty || restAreAllOnes);
+};

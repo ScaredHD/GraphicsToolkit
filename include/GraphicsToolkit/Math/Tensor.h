@@ -190,13 +190,11 @@ inline constexpr auto DimensionAsTupleV = DimensionAsTuple<D>::value;
 
 
 template<typename ToDimension, typename FromTensor>
-constexpr auto Cast(const FromTensor& t)
+constexpr auto Broadcast(const FromTensor& t)
 {
   using FromDimension = typename FromTensor::DimensionType;
 
-  static_assert(FromDimension::rank <= ToDimension::rank);
-  static_assert(IsCompatibleDimV<FromDimension, ToDimension>);
-  static_assert(std::is_same_v<BroadcastDimT<FromDimension, ToDimension>, ToDimension>);
+  static_assert(CanBroadcast<FromDimension, ToDimension>::value);
 
   using FromDimensionPadded = typename PadDim<FromDimension, ToDimension>::D1Padded;
 
