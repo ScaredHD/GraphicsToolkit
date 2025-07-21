@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-// #include <numeric>
 
 #include "Tuple.h"
 
@@ -53,6 +52,7 @@ struct TDimension {
 
   static constexpr size_t rank = sizeof...(dims);
   static constexpr size_t count = (dims * ...);
+  static_assert(count > 0, "Dimension count must be greater than 0");
 
   static constexpr bool isScalar = (rank == 0);
   static constexpr bool isVector = (rank == 1);
