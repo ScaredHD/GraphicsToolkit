@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Tensor.h"
+#include "TensorDefinition.h"
 
 template<typename T1, typename T2, typename BinaryOp>
 struct ComponentwiseOpHelper {
