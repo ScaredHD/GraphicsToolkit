@@ -9,6 +9,7 @@ add_library(imgui
     imgui/imgui_tables.cpp
     imgui/backends/imgui_impl_win32.cpp
     imgui/backends/imgui_impl_dx11.cpp
+    imgui/backends/imgui_impl_dx12.cpp
 )
 
 target_include_directories(imgui 
@@ -18,8 +19,11 @@ target_include_directories(imgui
 target_link_libraries(imgui
     PRIVATE
         d3d11.lib
+        d3d12.lib
         dxgi.lib
         dxguid.lib
         d3dcompiler.lib
         dwmapi
 )
+
+add_subdirectory(DirectXHelper)

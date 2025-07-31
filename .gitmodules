@@ -8,3 +8,6 @@
 	path = ext/imgui
 	url = https://github.com/ocornut/imgui
 	branch = docking
+[submodule "ext/DirectXHelper"]
+	path = ext/DirectXHelper
+	url = https://github.com/ScaredHD/DirectXHelper
