@@ -8,3 +8,5 @@ target_include_directories(
     INTERFACE
         ${gtk_inner_include_dir}/Core
 )
+
+add_subdirectory(Gui)

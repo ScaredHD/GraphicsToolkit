@@ -1,15 +1,10 @@
 
-add_executable(GuiTest WIN32
-    GuiTest.cpp
+add_executable(GuiTest
+    ImGuiApp.cpp
 )
 
 target_link_libraries(
     GuiTest
-    PUBLIC
+    PRIVATE
         imgui 
-        d3d11.lib
-        dxgi.lib
-        dxguid.lib
-        d3dcompiler.lib
-        dwmapi
 )
