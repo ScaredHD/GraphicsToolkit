@@ -11,3 +11,4 @@
 [submodule "ext/DirectXHelper"]
 	path = ext/DirectXHelper
 	url = https://github.com/ScaredHD/DirectXHelper
+	branch = refactor
